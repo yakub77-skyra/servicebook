@@ -19,13 +19,11 @@ import { Badge } from "@/components/ui/badge"
 import { Card, CardContent } from "@/components/ui/card"
 import { ServiceCard } from "@/components/site/service-card"
 
-// Pre-generate the static params for each service (helps SEO + perf).
-export async function generateStaticParams() {
-  const services = await getActiveServices()
-  return services.map((s) => ({ id: s.id }))
-}
+// Always render on-demand (never at build time) — the DB isn't available
+// during Vercel's static-generation phase.
+export const dynamic = "force-dynamic"
 
-// Per-service metadata for SEO.
+// Per-service metadata for SEO (runs at request time, not build time).
 export async function generateMetadata({
   params,
 }: {

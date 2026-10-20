@@ -8,6 +8,9 @@ generator client {
 }
 
 datasource db {
+  // Uses SQLite for local dev. For production (Vercel), the build script
+  // (vercel-build) automatically switches this to postgresql based on the
+  // DATABASE_URL scheme. See package.json "vercel-build" script.
   provider = "sqlite"
   url      = env("DATABASE_URL")
 }

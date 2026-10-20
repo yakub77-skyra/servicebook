@@ -3,6 +3,9 @@ import type { Metadata } from "next"
 import { getActiveServices, getServiceCategories } from "@/lib/services"
 import { ServicesExplorer } from "@/components/site/services-explorer"
 
+// Always render on-demand — queries the DB for services.
+export const dynamic = "force-dynamic"
+
 export const metadata: Metadata = {
   title: "Services — ServiceBook AI",
   description:

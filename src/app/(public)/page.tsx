@@ -22,6 +22,9 @@ import { siteConfig } from "@/lib/site"
 import { getActiveServices } from "@/lib/services"
 import { ServiceCard } from "@/components/site/service-card"
 
+// Always render on-demand — the ServicesPreview section queries the DB.
+export const dynamic = "force-dynamic"
+
 // Small static data used only for the hero preview card.
 const previewServices = [
   { icon: HomeIcon, label: "Home Cleaning", price: "₹499" },
