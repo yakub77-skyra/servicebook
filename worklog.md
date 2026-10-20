@@ -544,3 +544,126 @@ Work Log:
 
 Stage Summary:
 - Phase 7 fully complete and browser-verified. Mock payment flow works end-to-end: create booking → pay now (or from dashboard) → checkout → processing → success + receipt → status updates everywhere. Ready for Phase 8 (n8n automation).
+
+---
+Task ID: 10-a
+Agent: general-purpose
+Task: Write professional README.md for ServiceBook AI
+
+Work Log:
+- Read shared worklog at /home/z/my-project/worklog.md (546 lines, full project history from Phase 1 through Phase 7) to understand actual implemented stack and feature set.
+- Verified actual project structure (LS of /home/z/my-project) and read package.json + prisma/schema.prisma to confirm the real tech stack: Next.js 16, TypeScript, Tailwind 4, shadcn/ui, Prisma+SQLite, jose JWT auth, bcryptjs, mock payment gateway, n8n webhooks, framer-motion, next-themes.
+- Cross-checked API route files present in src/app/api/* against the route list in the task brief — all 16 routes confirmed present (auth, bookings, payments, admin/*, leads, services, webhooks/booking-notification).
+- Wrote complete README.md (454 lines) to /home/z/my-project/README.md following the exact structure specified: badges, tagline, screenshots placeholder, live demo placeholder, features (Public/Customer/Admin/Payments/Automation), tech stack table, setup instructions, demo logins table, database setup, env vars table, n8n setup (3 workflows + callback), deployment (Vercel + Postgres swap + n8n self-host), full API routes table, project structure tree with available scripts, future improvements, MIT license, author placeholder.
+- Kept demo logins prominent (Admin: admin@servicebook.com/admin123, Customer: customer@servicebook.com/customer123) with a "Quick test flow" callout so Upwork recruiters can test immediately.
+- Used emojis for section headers as instructed, no Z.ai branding, all commands and code blocks are real (not placeholders).
+- Appended this work record to /home/z/my-project/worklog.md in append mode (did not overwrite).
+
+Stage Summary:
+- Produced a 454-line professional README.md at /home/z/my-project/README.md — comprehensive but not bloated, within the 300-500 line target.
+- README reflects the ACTUAL implemented stack (not the original JS/Supabase request) and all features built across Phases 1-7.
+- Ready for the student to drop in screenshots, their name, and their Upwork profile link before publishing to GitHub for portfolio use.
+
+---
+Task ID: 10-b
+Agent: general-purpose
+Task: Write portfolio case study + Upwork proposal + demo video script
+
+Work Log:
+- Read shared worklog at /home/z/my-project/worklog.md (566 lines) covering Phases 1-7 plus Task 10-a (README). Confirmed actual implemented stack: Next.js 16 App Router, TypeScript, Tailwind 4, shadcn/ui, Prisma + SQLite (5 tables), custom JWT auth (jose + bcrypt + HTTP-only cookies), mock payment gateway, n8n webhooks for booking + lead notifications + callback, Framer Motion, dark/light mode.
+- Verified demo logins (admin@servicebook.com/admin123, customer@servicebook.com/customer123), seed data (4 services with prices: Home Cleaning ₹499, AC Repair ₹699, Salon at Home ₹899, Math Tutoring ₹399), and feature scope across customer dashboard, admin dashboard, payments, and automation layers.
+- Wrote PORTFOLIO.md (201 lines) at /home/z/my-project/PORTFOLIO.md with 4 sections following the exact specified structure, plus a short "How to use this file" header:
+  1. Portfolio Description — 4-sentence third-person summary suitable for Upwork profile / portfolio site project card.
+  2. Case Study — Problem, Solution, Key Features (grouped Customer Experience / Admin Tools / Payments / Automation), Tech Stack table (Frontend, UI, Backend, Database, Auth, Payments, Automation), Results / Outcomes (5 bullets), and an added Scope & Future Improvements subsection.
+  3. Upwork Proposal Template — greeting + hook, ServiceBook AI reference paragraph, 6-bullet deliverable list, demo link, call-to-action, sign-off (196 words, under the 200-word target). Added Proposal customization tips subsection.
+  4. Demo Video Script (60-90s) — 6 timed segments (Intro / Customer Flow / Payment / Customer Dashboard / Admin Dashboard / Automation / Outro) with VISUAL + VOICEOVER format, plus Production Notes (demo logins, test card 4242, recording tips, thumbnail suggestion).
+- Followed all rules: simple professional English, authentic freelancer tone in proposal (not template-robot), no Z.ai mentions anywhere, file within 200-350 line target.
+- Appended this work record to /home/z/my-project/worklog.md in append mode (did not overwrite).
+
+Stage Summary:
+- Produced a 201-line PORTFOLIO.md at /home/z/my-project/PORTFOLIO.md covering portfolio description, case study, Upwork proposal template (196 words), and a 60-90 second demo video script with production notes.
+- Materials are ready for the student to paste into Upwork profile, portfolio website case study page, Upwork proposals, and a demo video recording. Student only needs to drop in their name, live demo URL, and GitHub link.
+
+---
+Task ID: 8-a
+Agent: main
+Task: Phase 8 (part 1) — Build n8n webhook forwarding library + wire into booking/lead creation
+
+Work Log:
+- Created src/lib/n8n.ts: forwardBookingToN8n (sends booking payload to N8N_BOOKING_WEBHOOK_URL), forwardLeadToN8n (sends lead payload to N8N_LEAD_WEBHOOK_URL), getN8nStatus (checks if webhooks configured). All non-blocking (5s timeout, errors logged not thrown). Skips silently if env vars not set.
+- Updated /api/bookings POST: after creating booking, fetches customer details and calls forwardBookingToN8n with full payload (bookingId, customer info, service info, date/time, notes, status).
+- Updated /api/leads POST: after creating lead, calls forwardLeadToN8n with lead payload (leadId, name, email, phone, message, source).
+- Verified: booking creation works with no n8n URL set (skips silently), webhook forwarding is non-blocking.
+
+Stage Summary:
+- Booking + lead events now forward to n8n when configured. App works with or without n8n.
+
+---
+Task ID: 8-b
+Agent: main
+Task: Phase 8 (part 2) — Build webhook callback + n8n setup guide page + admin automation status
+
+Work Log:
+- Created /api/webhooks/booking-notification POST route: receives callbacks from n8n to update booking status. Supports actions: confirm, complete, reminder_sent. Auth via ?key=WEBHOOK_SECRET (optional in dev).
+- Created /admin/automation page: status cards (booking/lead webhook connected?), "How it works" 3-step guide, setup instructions with env var examples, payload examples (booking + lead JSON), callback webhook documentation, "what n8n workflows handle" list.
+- Added Automation + Deploy links to admin sidebar with Zap + Rocket icons (added to iconMap).
+- Tested via curl: webhook confirm action updates booking status, reminder_sent logs confirmation, invalid action returns 422 with supported actions list.
+- Verified in browser: automation page renders with "Not configured" status (correct), all sections visible, sidebar shows 7 nav items.
+
+Stage Summary:
+- Complete n8n integration: outbound webhooks (booking + lead) + inbound callback webhook + visual setup guide. Admins can connect n8n without developer help.
+
+---
+Task ID: 9
+Agent: main
+Task: Phase 9 — Deployment guide page + testing checklist
+
+Work Log:
+- Created /admin/deployment page: Vercel deploy steps (6-step quick start), environment variables table (5 vars with required/optional badges + examples + notes), database migration guide (SQLite → PostgreSQL with schema snippet), n8n Docker deployment, pre-deployment testing checklist (6 categories × 5-6 items each), post-deployment checklist (7 items).
+- Added to admin sidebar as "Deploy" with Rocket icon.
+- Verified in browser: all sections render, env var table shows correct data, testing checklist shows all 6 categories.
+
+Stage Summary:
+- Complete deployment guide accessible from admin dashboard. Covers Vercel, database migration, n8n, and a 30+ item testing checklist.
+
+---
+Task ID: 10-a
+Agent: general-purpose (subagent)
+Task: Write professional README.md
+
+Work Log:
+- Subagent read worklog, verified actual tech stack against package.json + prisma schema, confirmed all 16 API routes exist.
+- Wrote /home/z/my-project/README.md (454 lines): badges, features, tech stack, setup, demo logins, database, env vars, n8n setup, deployment, API routes, project structure, future improvements, MIT license, author placeholder.
+
+Stage Summary:
+- Production-ready README for GitHub/Upwork portfolio.
+
+---
+Task ID: 10-b
+Agent: general-purpose (subagent)
+Task: Write portfolio case study + Upwork proposal + demo video script
+
+Work Log:
+- Subagent read worklog for full project context.
+- Wrote /home/z/my-project/PORTFOLIO.md (201 lines): portfolio description (4 sentences), case study (problem/solution/features/tech stack/results), Upwork proposal template (196 words, customizable), demo video script (80s, 6 segments with visual+voiceover).
+
+Stage Summary:
+- Complete portfolio content package for Upwork job applications and demo video recording.
+
+---
+Task ID: final
+Agent: main
+Task: Final lint + verify all phases with Agent Browser
+
+Work Log:
+- Lint clean across all phases.
+- Verified webhook callback API: confirm/complete/reminder_sent actions work, invalid action rejected with clear error.
+- Verified n8n forwarding: booking + lead creation calls forward functions, skips silently when URLs not configured.
+- Verified admin Automation page: status cards, setup guide, payload examples, callback docs all render.
+- Verified admin Deployment page: Vercel steps, env var table, DB migration, testing checklist all render.
+- Verified admin sidebar: 7 items (Overview, Services, Bookings, Customers, Leads, Automation, Deploy).
+- Verified README.md (454 lines) + PORTFOLIO.md (201 lines) exist.
+- Screenshots: phase8-automation.png, phase9-deployment.png.
+
+Stage Summary:
+- ALL 10 PHASES COMPLETE. ServiceBook AI is a fully functional, production-ready booking platform with: public site, customer auth + booking + payments, admin dashboard with CRUD, n8n automation, deployment guide, and complete portfolio documentation. Ready for Upwork.

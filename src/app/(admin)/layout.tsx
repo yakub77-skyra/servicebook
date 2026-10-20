@@ -20,6 +20,8 @@ export default async function AdminLayout({
     { title: "Bookings", href: "/admin/bookings", icon: "CalendarCheck" },
     { title: "Customers", href: "/admin/customers", icon: "Users" },
     { title: "Leads", href: "/admin/leads", icon: "MessageSquare" },
+    { title: "Automation", href: "/admin/automation", icon: "Zap" },
+    { title: "Deploy", href: "/admin/deployment", icon: "Rocket" },
   ]
 
   return (

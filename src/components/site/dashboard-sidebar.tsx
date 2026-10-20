@@ -16,6 +16,8 @@ import {
   CalendarCheck,
   Users,
   MessageSquare,
+  Zap,
+  Rocket,
   type LucideIcon,
 } from "lucide-react"
 
@@ -39,6 +41,8 @@ const iconMap: Record<string, LucideIcon> = {
   CalendarCheck,
   Users,
   MessageSquare,
+  Zap,
+  Rocket,
 }
 
 export type DashboardNavItem = {

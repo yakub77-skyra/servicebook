@@ -3,6 +3,7 @@ import { NextResponse } from "next/server"
 import { db } from "@/lib/db"
 import { ok, fail } from "@/lib/api"
 import { getSession } from "@/lib/session"
+import { forwardBookingToN8n } from "@/lib/n8n"
 
 // Time slots offered for booking (30-min gaps during business hours).
 export const TIME_SLOTS = [
@@ -93,9 +94,30 @@ export async function POST(request: Request) {
       include: { service: true },
     })
 
-    // Phase 8 will forward this booking to the n8n webhook here:
-    //   await forwardBookingToN8n(booking)
-    // For now we just create the record.
+    // --- Fetch customer details for the n8n payload ---
+    const customer = await db.profile.findUnique({
+      where: { id: session.userId },
+      select: { name: true, email: true, phone: true },
+    })
+
+    // --- Forward booking data to n8n (non-blocking) ---
+    if (customer) {
+      await forwardBookingToN8n({
+        bookingId: booking.id,
+        customerName: customer.name,
+        customerEmail: customer.email,
+        customerPhone: customer.phone,
+        serviceTitle: booking.service.title,
+        servicePrice: booking.service.price,
+        durationMinutes: booking.service.durationMinutes,
+        bookingDate: booking.bookingDate,
+        bookingTime: booking.bookingTime,
+        notes: booking.notes,
+        status: booking.status,
+        paymentStatus: booking.paymentStatus,
+        createdAt: booking.createdAt.toISOString(),
+      })
+    }
 
     return ok(booking, 201)
   } catch (error) {

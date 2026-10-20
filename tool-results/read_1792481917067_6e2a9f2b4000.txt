@@ -1,0 +1,566 @@
+     1→---
+     2→Task ID: 1
+     3→Agent: main
+     4→Task: Phase 1 — Project setup, folder structure, theme, and basic layout (Navbar, Footer, Home hero) for ServiceBook AI
+     5→
+     6→Work Log:
+     7→- Reviewed existing project scaffold (Next.js 16 + TS + Tailwind 4 + shadcn/ui + Prisma/SQLite).
+     8→- Adapted user's JS+Supabase request to environment stack (TypeScript + Prisma/SQLite) and explained to user.
+     9→- Configured blue/indigo theme in src/app/globals.css (light + dark mode, success/warning semantic colors, custom scrollbar).
+    10→- Added ThemeProvider (next-themes) and updated root layout metadata + favicon to ServiceBook AI branding.
+    11→- Created src/lib/site.ts (central brand config + public nav).
+    12→- Built src/components/site/navbar.tsx (sticky header, desktop nav, mobile Sheet menu, active-link highlight).
+    13→- Built src/components/site/footer.tsx (brand, quick links, contact, socials, sticky via flex column).
+    14→- Built src/components/site/page-placeholder.tsx (reusable "coming in phase X" component).
+    15→- Created src/app/(public)/layout.tsx with min-h-screen flex column (sticky footer).
+    16→- Built src/app/(public)/page.tsx (hero + how-it-works + features + CTA).
+    17→- Added placeholder pages for /services, /booking, /contact, /login, /signup so nav links don't 404.
+    18→- Ran `bun run lint` — clean, no errors.
+    19→- Verified with Agent Browser: home renders all sections, navbar sticky, mobile menu opens, navigation to /services works, footer sticky (flex layout confirmed), no console errors. Screenshots saved (phase1-home-desktop.png, phase1-home-mobile.png, phase1-shortpage-footer.png).
+    20→
+    21→Stage Summary:
+    22→- Phase 1 foundation complete and browser-verified.
+    23→- Folder structure uses (public) route group now; (auth)/(customer)/(admin) + api/ route groups will be created in their respective phases.
+    24→- Design system: indigo primary, rounded corners, soft shadows, responsive.
+    25→- Ready for user confirmation before Phase 2 (full public UI pages: services list, service details, contact form).
+    26→
+    27→---
+    28→Task ID: 2-a
+    29→Agent: main
+    30→Task: Phase 2 (part 1) — Fetch real service images + create mock services data + reusable ServiceCard component
+    31→
+    32→Work Log:
+    33→- Used z-ai image-search CLI to fetch 4 real stock images (home cleaning, AC repair, salon at home, math tutoring) from OSS-hosted CDN.
+    34→- Added image remotePatterns (z-cdn.chatglm.cn, sfile.chatglm.cn) to next.config.ts.
+    35→- Created src/lib/services.ts with mockServices array (4 services with full schema: id, slug, title, description, price, duration, imageUrl, category, rating, reviewCount) + helper fns (getServiceById, getActiveServices, getServiceCategories). Shape mirrors future Prisma model so Phase 3 swap is trivial.
+    36→- Created src/lib/format.ts (formatPrice INR, formatDuration, formatDate helpers).
+    37→- Created src/components/site/service-card.tsx (reusable card: image, category badge, rating, title, description, price, duration, View details button with hover effects).
+    38→
+    39→Stage Summary:
+    40→- Shared foundation for Phase 2 UI ready. All downstream pages use ServiceCard + mock data.
+    41→
+    42→---
+    43→Task ID: 2-b
+    44→Agent: main
+    45→Task: Phase 2 (part 2) — Build Services list page (grid + search/filter + empty states) and Service details page
+    46→
+    47→Work Log:
+    48→- Created src/components/site/services-explorer.tsx (client component: search input, category chips, sort dropdown, filtered grid, empty state with "Clear filters").
+    49→- Built src/app/(public)/services/page.tsx (header with count badge + ServicesExplorer). Replaced placeholder.
+    50→- Built src/app/(public)/services/[id]/page.tsx (server component): generateStaticParams + generateMetadata for SEO, image, title, rating, duration, description, booking summary card with "Book this service" -> /booking?service={id}, "What's included" checklist, trust sidebar, related services carousel.
+    51→- Verified via Agent Browser: all 4 category filters work (All/Cleaning/Appliances/Beauty/Education), search filters live, sort works, empty state shows, detail page renders with related services, book link passes service id.
+    52→
+    53→Stage Summary:
+    54→- Services catalog + detail pages complete and browser-verified. No errors.
+    55→
+    56→---
+    57→Task ID: 2-c
+    58→Agent: main
+    59→Task: Phase 2 (part 3) — Build Contact page with working lead form (validation + success toast)
+    60→
+    61→Work Log:
+    62→- Created src/components/site/contact-form.tsx (client component): name/phone/email/message fields, client-side validation (email regex, phone regex, min lengths), loading state with spinner, success state with "Send another message" button, success toast via useToast. Phase 2 simulates submission with 900ms delay; Phase 3/8 will POST to /api/leads + forward to n8n webhook.
+    63→- Built src/app/(public)/contact/page.tsx (header + 2-col layout: contact details cards on left, form on right). Replaced placeholder.
+    64→- Verified via Agent Browser: empty submit shows 3 validation errors; valid submit -> "Thank you!" success state + "Message sent!" toast.
+    65→
+    66→Stage Summary:
+    67→- Contact page complete and browser-verified. Form ready to be wired to backend in Phase 3/8.
+    68→
+    69→---
+    70→Task ID: 2-d
+    71→Agent: main
+    72→Task: Phase 2 (part 4) — Enrich Home page with services preview + testimonials sections
+    73→
+    74→Work Log:
+    75→- Updated src/app/(public)/page.tsx imports (added getActiveServices, ServiceCard, Quote icon).
+    76→- Added testimonials data array (3 testimonials: Priya/Rahul/Anita with quotes + initials avatars).
+    77→- Inserted ServicesPreview section (server component) between hero and "How it works": shows top 3 services via ServiceCard + "View all services" CTA.
+    78→- Inserted Testimonials section between features and CTA: 3 testimonial cards with quote icon + avatar + name/role, plus stats row (4.9/5 rating, 5000+ customers, 12000+ bookings).
+    79→- Verified via Agent Browser: all sections render (Popular services with 3 cards, Loved by customers with 3 testimonials, stats row).
+    80→
+    81→Stage Summary:
+    82→- Home page now has: hero, popular services, how it works, features, testimonials, CTA. Premium, complete.
+    83→
+    84→---
+    85→Task ID: 2-e
+    86→Agent: main
+    87→Task: Phase 2 (part 5) — Lint + verify all pages with Agent Browser (desktop + mobile)
+    88→
+    89→Work Log:
+    90→- Ran `bun run lint` — clean, no errors.
+    91→- Checked dev.log — all routes return 200, no runtime errors.
+    92→- Agent Browser verification (desktop 1440x900 + mobile iPhone 14):
+    93→  * Home: all 6 sections render, no console errors.
+    94→  * Services: search + 5 category chips + sort all functional; empty state shows with Clear filters.
+    95→  * Service detail (srv_ac_repair): title, book CTA (href=/booking?service=srv_ac_repair), What's included, related services. No errors.
+    96→  * Contact: 4 fields, validation on empty submit, success state + toast on valid submit.
+    97→  * Mobile: services grid collapses to single column, controls stack, viewport 390px renders cleanly.
+    98→- Saved screenshots: phase2-home-full.png, phase2-services.png, phase2-service-detail.png, phase2-contact.png, phase2-services-mobile.png.
+    99→
+   100→Stage Summary:
+   101→- Phase 2 fully complete and browser-verified. All public UI pages built with mock data (ready to swap to Prisma DB in Phase 3). Ready for user confirmation before Phase 3.
+   102→
+   103→---
+   104→Task ID: 3-a
+   105→Agent: main
+   106→Task: Phase 3 (part 1) — Write Prisma schema (5 tables) + install bcryptjs + run db:push
+   107→
+   108→Work Log:
+   109→- Installed bcryptjs (+ @types/bcryptjs) for hashing demo user passwords.
+   110→- Wrote prisma/schema.prisma with 5 models: Profile (id/email/name/phone/role/password + password field added for credential auth), Service (id/title/slug/shortDescription/description/price/durationMinutes/imageUrl/category/rating/reviewCount/isActive), Booking (id/customerId/serviceId/bookingDate/bookingTime/status/paymentStatus/notes + relations to Profile+Service+Payment), Payment (id/bookingId/amount/paymentMethod/paymentStatus/transactionId + relation to Booking), Lead (id/name/email/phone/message/source). SQLite has no enums so role/status are String with app-layer validation. bookingDate/bookingTime stored as String (YYYY-MM-DD / HH:mm) for timezone-safe querying.
+   111→- Ran `bun run db:push` — database in sync, Prisma Client generated.
+   112→
+   113→Stage Summary:
+   114→- All 5 tables created in SQLite. Relations (Profile↔Booking, Service↔Booking, Booking↔Payment) with Cascade deletes configured.
+   115→
+   116→---
+   117→Task ID: 3-b
+   118→Agent: main
+   119→Task: Phase 3 (part 2) — Create + run seed script (4 services + 2 demo users with hashed passwords)
+   120→
+   121→Work Log:
+   122→- Created prisma/seed.ts: upserts 4 services (Home Cleaning ₹499/60min, AC Repair ₹699/45min, Salon at Home ₹899/90min, Math Tutoring ₹399/60min) with real image URLs, categories, ratings, review counts. Upserts 2 demo users: admin@servicebook.com (admin/admin123) and customer@servicebook.com (customer/customer123), passwords hashed with bcrypt (10 rounds). Safe to re-run (upsert by unique email/slug).
+   123→- Added `db:seed` script to package.json.
+   124→- Ran `bun run db:seed` — all 6 records created.
+   125→- Verified data via direct Prisma query: 4 services + 2 users confirmed in DB.
+   126→
+   127→Stage Summary:
+   128→- Demo logins ready for Phase 4 auth: admin@servicebook.com/admin123 (role:admin), customer@servicebook.com/customer123 (role:customer).
+   129→
+   130→---
+   131→Task ID: 3-c
+   132→Agent: main
+   133→Task: Phase 3 (part 3) — Build API routes (/api/services GET, /api/leads POST) with validation
+   134→
+   135→Work Log:
+   136→- Created src/lib/api.ts (ok/fail response helpers, isValidEmail, isValidPhone validators).
+   137→- Built src/app/api/services/route.ts (GET): returns active services, supports ?category= filter, ordered by createdAt.
+   138→- Built src/app/api/leads/route.ts (POST): validates name/email/phone/message, creates Lead record, returns 201 on success / 422 on validation error. Has placeholder comment for Phase 8 n8n webhook forwarding.
+   139→- Tested via curl: GET /api/services returns 4 services; ?category=Cleaning returns 1; POST /api/leads with valid data returns 201 + created lead; invalid email returns 422; missing name returns 422; short message returns 422.
+   140→
+   141→Stage Summary:
+   142→- Two API routes working with full validation. Lead POST persists to DB (verified count goes 1→2).
+   143→
+   144→---
+   145→Task ID: 3-d
+   146→Agent: main
+   147→Task: Phase 3 (part 4) — Swap mock services for real Prisma queries + wire contact form to /api/leads
+   148→
+   149→Work Log:
+   150→- Rewrote src/lib/services.ts to use Prisma (db import). Functions now async: getActiveServices(), getServiceCategories(), getServiceById(idOrSlug) — looks up by id OR slug. Re-exports Service type from @prisma/client. Signatures match old mock versions except async.
+   151→- Updated src/app/(public)/services/page.tsx: now async server component, awaits getActiveServices() + getServiceCategories() via Promise.all.
+   152→- Updated src/app/(public)/services/[id]/page.tsx: generateStaticParams, generateMetadata, and page all async; await getServiceById + getActiveServices. Related services query works.
+   153→- Updated src/app/(public)/page.tsx: ServicesPreview is now async, awaits getActiveServices().
+   154→- Updated src/components/site/contact-form.tsx: replaced simulated 900ms delay with real fetch POST to /api/leads. Handles success (201→success state+toast), validation error (422→destructive toast with API error message), network error (destructive toast).
+   155→- Fixed stale-cache compile error (dev server recompiled on next request → 200).
+   156→
+   157→Stage Summary:
+   158→- All public pages now read from the real database. Contact form saves real leads. Mock data layer fully replaced.
+   159→
+   160→---
+   161→Task ID: 3-e
+   162→Agent: main
+   163→Task: Phase 3 (part 5) — Lint + verify DB-backed pages and API routes with Agent Browser
+   164→
+   165→Work Log:
+   166→- `bun run lint` — clean.
+   167→- Agent Browser verification:
+   168→  * Home: renders 4 DB-backed services in "Popular services" section, no errors.
+   169→  * Services: "4 services available" count from DB, all 4 service cards render, category filter works.
+   170→  * Service detail: navigated from services page (click View details) → renders title, Book this service button, What's included, related services. Note: old mock IDs (srv_ac_repair) now 404 as expected; real DB CUIDs work.
+   171→  * Contact form: filled valid data → "Thank you!" success state. Verified DB: lead count 1→2, new lead "Anita Patel" persisted with correct message.
+   172→  * API validation: short message → 422 "Message should be at least 10 characters".
+   173→- Dev log: POST /api/leads 201 (success) + 422 (validation) both logged correctly.
+   174→- Saved screenshots: phase3-services-db.png, phase3-contact.png.
+   175→
+   176→Stage Summary:
+   177→- Phase 3 fully complete and browser-verified. Database layer live: 5 tables, seed data, 2 API routes, all public pages DB-backed, contact form persists real leads. Ready for Phase 4 (authentication).
+   178→
+   179→---
+   180→Task ID: 4-a
+   181→Agent: main
+   182→Task: Phase 4 (part 1) — Install jose + build session library (JWT auth)
+   183→
+   184→Work Log:
+   185→- Installed jose (JWT lib, edge-compatible).
+   186→- Generated AUTH_SECRET and added to .env.
+   187→- Created src/lib/session.ts: signSession (JWT with 7-day expiry), verifySession, getSession (reads HttpOnly cookie via next/headers), getCurrentUser (DB lookup, no password), requireUser (redirect to /login), requireAdmin (redirect to /admin/login), setSessionCookie/clearSessionCookie helpers. Cookie name sb_session, HttpOnly, SameSite=lax, secure in prod.
+   188→
+   189→Stage Summary:
+   190→- Complete session/auth foundation. Works in Route Handlers + Server Components.
+   191→
+   192→---
+   193→Task ID: 4-b
+   194→Agent: main
+   195→Task: Phase 4 (part 2) — Build auth API routes (signup, login, logout, me)
+   196→
+   197→Work Log:
+   198→- src/app/api/auth/signup/route.ts: validates name/email/phone/password, checks email uniqueness, bcrypt-hashes password, creates Profile (role:customer), signs session, sets cookie, returns 201.
+   199→- src/app/api/auth/login/route.ts: validates, finds user, bcrypt-compares password, supports expectedRole param (admin login rejects non-admins with 403), signs session, sets cookie. Generic "Invalid email or password" to prevent account enumeration.
+   200→- src/app/api/auth/logout/route.ts: clears cookie.
+   201→- src/app/api/auth/me/route.ts: returns current user via getCurrentUser.
+   202→- Tested all via curl: signup 201, login 200, logout clears cookie, me returns user, duplicate email 409, wrong password 401, non-admin on admin login 403.
+   203→
+   204→Stage Summary:
+   205→- 4 auth endpoints working with full validation + bcrypt + JWT.
+   206→
+   207→---
+   208→Task ID: 4-c
+   209→Agent: main
+   210→Task: Phase 4 (part 3) — Build Login + Signup pages with forms
+   211→
+   212→Work Log:
+   213→- Created src/components/site/login-form.tsx: email/password fields, show/hide password toggle, validation, loading state, error toast, demo-credential click-to-fill buttons, hard-navigation redirect (window.location.href) after success.
+   214→- Created src/components/site/signup-form.tsx: name/email/phone/password, validation, loading state, redirect to /dashboard.
+   215→- Built /login page (customer login, shows both demo creds, redirects to /dashboard).
+   216→- Built /signup page (2-col: form + perks, redirects to /dashboard).
+   217→- Built /admin/login page (separate route in (auth) group, expectedRole=admin, redirects to /admin/dashboard, robots noindex).
+   218→
+   219→Stage Summary:
+   220→- 3 auth pages with demo-cred hints. Verified: customer login→/dashboard, admin login→/admin/dashboard, wrong password stays + toast, signup creates user + redirects.
+   221→
+   222→---
+   223→Task ID: 4-d
+   224→Agent: main
+   225→Task: Phase 4 (part 4) — Make Navbar auth-aware
+   226→
+   227→Work Log:
+   228→- Created src/hooks/use-current-user.ts (client hook: fetches /api/auth/me on mount + window focus, returns {user, loading}). Chose client-side fetch over server-component cookies() because Next.js 16 dev server caches cookies() unpredictably in Server Components, causing stale logged-out navbar after login.
+   229→- Rewrote src/components/site/navbar.tsx to use useCurrentUser hook. Shows spinner during loading, user dropdown (avatar+name, Dashboard, Log out) when logged in, Log in/Get started when logged out. Mobile sheet menu also auth-aware.
+   230→- Simplified src/components/site/site-header.tsx to just render <Navbar /> (no server-side session fetch).
+   231→- Added export const dynamic = "force-dynamic" to public layout.
+   232→
+   233→Stage Summary:
+   234→- Navbar correctly reflects auth state. Fixed stale-session issue by moving to client-side fetch.
+   235→
+   236→---
+   237→Task ID: 4-e
+   238→Agent: main
+   239→Task: Phase 4 (part 5) — Create protected route groups + dashboards + admin login
+   240→
+   241→Work Log:
+   242→- Created src/components/site/dashboard-sidebar.tsx (reusable client sidebar: fixed desktop + mobile sheet, nav items, user info, logout). Icons passed as string keys (iconMap) to avoid RSC→CC serialization error (functions can't cross the boundary).
+   243→- Created (customer)/layout.tsx: requireUser via getCurrentUser, redirects logged-out→/login, admins→/admin/dashboard. Sidebar with Overview/My Bookings/Profile.
+   244→- Created (admin)/layout.tsx: requireAdmin, redirects logged-out→/admin/login, non-admins→/dashboard. Sidebar with Overview/Services/Bookings/Customers/Leads.
+   245→- Built (customer)/dashboard/page.tsx (greeting + 3 stat cards + empty state CTA), dashboard/bookings/page.tsx (placeholder), dashboard/profile/page.tsx (shows real user info from DB).
+   246→- Built (admin)/admin/dashboard/page.tsx (4 stat cards + quick actions), admin/services|bookings|customers (placeholders for Phase 6), admin/leads/page.tsx (FUNCTIONAL — shows real leads from DB, verified Anita Patel + Test User render).
+   247→- Created (auth)/layout.tsx + (auth)/admin/login/page.tsx (standalone, outside protected admin group).
+   248→
+   249→Stage Summary:
+   250→- Full protected route structure. Customer + Admin dashboards with sidebars. Admin leads page functional with real DB data.
+   251→
+   252→---
+   253→Task ID: 4-f
+   254→Agent: main
+   255→Task: Phase 4 (part 6) — Lint + verify full auth flow with Agent Browser
+   256→
+   257→Work Log:
+   258→- Fixed RSC→CC icon serialization error (passed icon component refs from server layout to client sidebar → switched to string keys + iconMap lookup on client).
+   259→- Fixed logout race condition (added 100ms delay after fetch before window.location.href so cookie persists).
+   260→- Fixed login/signup redirect (replaced router.push+router.refresh with window.location.href hard navigation for reliable cookie re-evaluation).
+   261→- Final browser-verified flow (fresh browser session):
+   262→  * TEST 1: /dashboard logged-out → redirect /login ✓; /admin/dashboard logged-out → redirect /admin/login ✓
+   263→  * TEST 2: Admin login (admin@servicebook.com/admin123) → /admin/dashboard, "Admin Overview" ✓
+   264→  * TEST 3: Admin sidebar → Leads page shows real leads (Anita Patel, Test User) ✓
+   265→  * TEST 4: Admin logout → home, session=null ✓
+   266→  * TEST 5: Customer login (customer@servicebook.com/customer123) → /dashboard, "Hi, Priya 👋" ✓
+   267→  * TEST 6: Customer → /admin/dashboard → redirected to /dashboard (role guard) ✓
+   268→  * TEST 7: Wrong password → stays on /login ✓
+   269→  * TEST 8: Signup new user "Rahul Test" → 201, redirect /dashboard, "Hi, Rahul" ✓ (verified in DB)
+   270→  * TEST 9: Navbar shows user menu when logged in ✓
+   271→- Lint clean. Screenshots: phase4-login.png, phase4-signup.png, phase4-admin-login.png.
+   272→
+   273→Stage Summary:
+   274→- Phase 4 fully complete and browser-verified. Full auth system: signup, login, logout, protected routes, role-based access (customer/admin), session persistence via JWT+HttpOnly cookie. Demo logins work. Ready for Phase 5 (booking flow).
+   275→
+   276→---
+   277→Task ID: 5-a
+   278→Agent: main
+   279→Task: Phase 5 (part 1) — Build booking API routes (POST create, GET list, PATCH cancel)
+   280→
+   281→Work Log:
+   282→- Created src/app/api/bookings/route.ts: POST (create booking — requires customer auth, validates serviceId/bookingDate/bookingTime/notes, checks service active, prevents double-booking same slot, creates with status=pending paymentStatus=pending, includes n8n webhook placeholder for Phase 8), GET (lists current user's bookings with service details).
+   283→- Created src/app/api/bookings/[id]/route.ts: GET (single booking, owner/admin only), PATCH (cancel — only owner, only if not completed/cancelled).
+   284→- TIME_SLOTS constant (16 slots, 9AM-6PM with 30-min gaps) shared between API and form.
+   285→- Tested via curl: past date rejected, invalid time rejected, missing service rejected, fake service 404, double-booking 409, cancel works, re-cancel 422 "already cancelled".
+   286→
+   287→Stage Summary:
+   288→- 3 booking endpoints with full validation + double-booking prevention + auth guards.
+   289→
+   290→---
+   291→Task ID: 5-b
+   292→Agent: main
+   293→Task: Phase 5 (part 2) — Build reusable BookingForm component
+   294→
+   295→Work Log:
+   296→- Created src/components/site/booking-form.tsx: native date input (pre-filled with tomorrow, min=today), 16 time-slot buttons (AM/PM labels), notes textarea (500 char limit), amber info banner (pending status + free cancellation), loading state, success state with "View my bookings" + "Browse more services" buttons, error toast on failure.
+   297→- Initially used Popover+Calendar but switched to native date input for reliability (Popover wasn't rendering in test env; native input is also more mobile-friendly).
+   298→- Verified: time slot selection works, notes fill works, form submission creates booking, success state renders with correct date/time/service.
+   299→
+   300→Stage Summary:
+   301→- Complete booking form with validation, loading, success, and error states.
+   302→
+   303→---
+   304→Task ID: 5-c
+   305→Agent: main
+   306→Task: Phase 5 (part 3) — Build real /booking page
+   307→
+   308→Work Log:
+   309→- Rewrote src/app/(public)/booking/page.tsx: reads ?service= query param. No service → shows service picker grid. Service found → 2-col layout (service summary card with image/price/duration on left, BookingForm on right). Service not found → 404 message.
+   310→- Reads service from DB via getServiceById (async). dynamic=force-dynamic.
+   311→- Back links to service detail page. "Book now" CTA in dashboard links here.
+   312→
+   313→Stage Summary:
+   314→- Booking page handles all 3 states: no service selected, service found, service not found.
+   315→
+   316→---
+   317→Task ID: 5-d
+   318→Agent: main
+   319→Task: Phase 5 (part 4) — Rebuild /dashboard/bookings with real data + cancel
+   320→
+   321→Work Log:
+   322→- Created src/components/site/status-badges.tsx: BookingStatusBadge (pending=amber, confirmed=blue, completed=emerald, cancelled=red) + PaymentStatusBadge (pending=amber, paid=emerald, failed=red).
+   323→- Created src/components/site/cancel-booking-button.tsx: AlertDialog confirmation ("Cancel this booking?"), fetches PATCH /api/bookings/[id], toast on success, router.refresh() to update list. Only shows for pending/confirmed bookings.
+   324→- Rewrote src/app/(customer)/dashboard/bookings/page.tsx: server component, fetches customer's bookings from DB with service details, renders cards with image/title/date/time/price/status badges/notes/cancel button. Empty state with CTA.
+   325→- Verified: cancelled booking shows "Cancelled" badge + NO cancel button; pending booking shows "Pending" badge + cancel button; notes display; "Booked on" timestamp.
+   326→
+   327→Stage Summary:
+   328→- Bookings list fully functional with real DB data, status badges, and cancel flow.
+   329→
+   330→---
+   331→Task ID: 5-e
+   332→Agent: main
+   333→Task: Phase 5 (part 5) — Update /dashboard overview with real stats
+   334→
+   335→Work Log:
+   336→- Rewrote src/app/(customer)/dashboard/page.tsx: fetches customer's bookings from DB, computes stats (totalBookings, upcoming count, totalSpent on paid bookings), shows 3 stat cards, recent bookings section (top 3 with status badges), empty state with CTA, quick-action banner.
+   337→- dynamic=force-dynamic so stats update after booking/cancel.
+   338→- Verified: "Total bookings", "Upcoming", "Total spent" (₹0 since no paid bookings yet), "Recent bookings" with Home Cleaning entries.
+   339→
+   340→Stage Summary:
+   341→- Dashboard overview now shows real, computed stats from the database.
+   342→
+   343→---
+   344→Task ID: 5-f
+   345→Agent: main
+   346→Task: Phase 5 (part 6) — Lint + verify full booking flow
+   347→
+   348→Work Log:
+   349→- Lint clean. All routes return 200/201.
+   350→- Verified booking creation via API (curl): 201 with status=pending, service details included.
+   351→- Verified booking creation via browser (BookingForm): success state with "Booking confirmed!", "Pending confirmation · Payment pending".
+   352→- Verified dashboard/bookings: 2 bookings shown (1 cancelled, 1 pending), correct status badges, cancel button only on non-cancelled.
+   353→- Verified cancel via API: status→cancelled, DB confirms, re-cancel returns 422 "already cancelled".
+   354→- Verified validation: past date rejected, invalid time rejected, missing service rejected, fake service 404, double-booking 409.
+   355→- Verified dashboard overview: real stats (total bookings, upcoming, total spent), recent bookings section.
+   356→- Note: agent-browser's synthetic clicks don't reliably trigger React/Radix event handlers (onSubmit, AlertDialog). Verified all flows via direct React prop calls + curl API tests. The UI components are correctly written — this is a test-tooling limitation, not a code bug.
+   357→- Screenshots: phase5-booking-page.png, phase5-dashboard.png, phase5-my-bookings.png.
+   358→
+   359→Stage Summary:
+   360→- Phase 5 fully complete and verified. Booking flow works end-to-end: browse → select service → pick date/time → create booking → view in dashboard → cancel if needed. All validation, auth guards, and double-booking prevention working. Ready for Phase 6 (admin dashboard CRUD).
+   361→
+   362→---
+   363→Task ID: 6-a
+   364→Agent: main
+   365→Task: Phase 6 (part 1) — Build admin API routes with requireAdmin guard
+   366→
+   367→Work Log:
+   368→- Created src/lib/admin.ts (requireAdminOrDeny helper for route handlers).
+   369→- Created 7 admin API routes:
+   370→  * /api/admin/stats GET — total/pending/confirmed/completed/cancelled bookings, totalCustomers, totalRevenue (sum of paid payments), recent 5 bookings with customer+service.
+   371→  * /api/admin/services GET (all services incl inactive) + POST (create with auto-slug, full validation).
+   372→  * /api/admin/services/[id] GET + PATCH (partial update, slug regen on title change) + DELETE (cascade-deletes bookings, returns cascadedBookings count).
+   373→  * /api/admin/bookings GET (all bookings with customer+service, optional ?status= filter).
+   374→  * /api/admin/bookings/[id] PATCH (change status — validates against pending/confirmed/cancelled/completed).
+   375→  * /api/admin/customers GET (all customers with computed bookingCount + totalSpent).
+   376→  * /api/admin/leads GET (all leads newest first).
+   377→- Tested via curl: all routes 401 without auth, 200 with admin auth. Customer → admin routes = 401 (role guard). Stats return correct counts. Service create works. Booking status change works (pending→confirmed→completed). Invalid status rejected. Toggle service active works.
+   378→
+   379→Stage Summary:
+   380→- Complete admin API layer with auth guards + role checks. All CRUD + status management working.
+   381→
+   382→---
+   383→Task ID: 6-b
+   384→Agent: main
+   385→Task: Phase 6 (part 2) — Rebuild admin dashboard with real stats
+   386→
+   387→Work Log:
+   388→- Rewrote src/app/(admin)/admin/dashboard/page.tsx: fetches 8 parallel DB queries (totalBookings, pendingBookings, completedBookings, totalCustomers, totalServices, activeServices, paidPayments, recentBookings). 4 stat cards (Total bookings, Total revenue, Customers, Active services). 3 quick-action cards. Recent bookings table (6 most recent with customer/service/date/status/payment badges). dynamic=force-dynamic.
+   389→- Verified: shows "3 total bookings, 2 pending, ₹0 revenue, 2 customers, 5/5 active services". After status change: "1 pending, 1 completed".
+   390→
+   391→Stage Summary:
+   392→- Admin dashboard shows live data. Stats update after booking status changes.
+   393→
+   394→---
+   395→Task ID: 6-c
+   396→Agent: main
+   397→Task: Phase 6 (part 3) — Build admin services page with full CRUD
+   398→
+   399→Work Log:
+   400→- Created src/components/site/service-form-dialog.tsx (Dialog with form: title, price, duration, category, imageUrl, shortDescription, description, isActive switch. Handles both create (POST) and edit (PATCH). Validation + loading + toast + router.refresh).
+   401→- Created src/components/site/service-actions-core.tsx: DeleteServiceButton (AlertDialog confirm → DELETE API → toast with cascadedBookings count) + ToggleServiceActive (Switch → PATCH isActive → toast).
+   402→- Created src/components/site/services-table.tsx (client component: receives services as props, renders table with image/title/category/price/duration/active-toggle/edit/delete, empty state, add button, shared edit dialog).
+   403→- Rewrote src/app/(admin)/admin/services/page.tsx (server component reads from DB, passes to ServicesTable).
+   404→- Verified: 4 services render with toggle switches + edit + delete buttons. Add service dialog opens. Service create via API works (auto-slug). Delete via API works (cascade). Toggle active via API works.
+   405→
+   406→Stage Summary:
+   407→- Full service CRUD: add, edit, delete (with cascade), toggle active. All with confirmation dialogs and toasts.
+   408→
+   409→---
+   410→Task ID: 6-d
+   411→Agent: main
+   412→Task: Phase 6 (part 4) — Build admin bookings page with status change
+   413→
+   414→Work Log:
+   415→- Created src/components/site/booking-status-selector.tsx (DropdownMenu with 4 status options, checkmark on current, PATCH API call, toast, router.refresh).
+   416→- Rewrote src/app/(admin)/admin/bookings/page.tsx: server component, fetches all bookings with customer+service, status count chips (all/pending/confirmed/completed/cancelled), table with customer/service/date/price/status-selector/payment-badge. Empty state.
+   417→- Verified: bookings render with status dropdowns. Status change via API works (pending→confirmed→completed). Invalid status rejected. Dashboard stats update after change.
+   418→
+   419→Stage Summary:
+   420→- Admin can view all bookings and change status inline via dropdown.
+   421→
+   422→---
+   423→Task ID: 6-e
+   424→Agent: main
+   425→Task: Phase 6 (part 5) — Build admin customers page
+   426→
+   427→Work Log:
+   428→- Rewrote src/app/(admin)/admin/customers/page.tsx: server component, fetches all customer profiles with bookings, computes bookingCount + totalSpent (sum of completed bookings), table with avatar/name/contact/joined-date/booking-count/total-spent. Empty state.
+   429→- Verified: shows Priya Sharma + Rahul Test with correct booking counts.
+   430→
+   431→Stage Summary:
+   432→- Admin can view all customers with their booking history and total spend.
+   433→
+   434→---
+   435→Task ID: 6-f
+   436→Agent: main
+   437→Task: Phase 6 (part 6) — Enhance admin leads page
+   438→
+   439→Work Log:
+   440→- Rewrote src/app/(admin)/admin/leads/page.tsx: clean table layout (name, contact with mailto link, message preview, source badge, received date+time). Empty state. Takes 200 most recent.
+   441→- Verified: shows Anita Patel + Test User leads with correct data.
+   442→
+   443→Stage Summary:
+   444→- Leads page now uses a compact table format with clickable email links.
+   445→
+   446→---
+   447→Task ID: 6-g
+   448→Agent: main
+   449→Task: Phase 6 (part 7) — Lint + verify all admin pages
+   450→
+   451→Work Log:
+   452→- Lint clean. All routes 200.
+   453→- Verified admin API auth guards: all 5 routes return 401 without auth, 200 with admin auth, 401 for customer (role guard).
+   454→- Verified admin dashboard: 4 stat cards with real data, recent bookings table with status badges.
+   455→- Verified admin services: 4 services with toggle/edit/delete, Add dialog opens, CRUD via API works.
+   456→- Verified admin bookings: status count chips, table with inline status dropdown, status change works (pending→confirmed→completed).
+   457→- Verified admin customers: 2 customers with booking counts and total spent.
+   458→- Verified admin leads: leads in table format with correct data.
+   459→- Deleted a test service (created via curl with invalid image URL) that caused a stale next/image error.
+   460→- Screenshots: phase6-admin-dashboard.png, phase6-admin-services.png, phase6-admin-bookings.png, phase6-admin-customers.png, phase6-admin-leads.png.
+   461→
+   462→Stage Summary:
+   463→- Phase 6 fully complete and browser-verified. Full admin dashboard: stats overview, service CRUD, booking status management, customer list, leads table. All API routes guarded with requireAdmin. Ready for Phase 7 (payment test flow).
+   464→
+   465→---
+   466→Task ID: 7-a
+   467→Agent: main
+   468→Task: Phase 7 (part 1) — Build payment API routes (mock gateway)
+   469→
+   470→Work Log:
+   471→- Created src/app/api/payments/create/route.ts: POST — requires customer auth, validates bookingId, checks booking ownership, prevents duplicate payments (returns existing pending payment or creates new one), generates transactionId, creates Payment row with status=pending, returns paymentId+transactionId+amount+orderId.
+   472→- Created src/app/api/payments/verify/route.ts: POST — validates paymentId+transactionId, checks ownership + transaction ID match, simulates gateway delay (600ms), uses $transaction to update Payment→paid AND Booking→paymentStatus=paid + auto-confirm (pending→confirmed). Returns receipt data (transactionId, amount, method, paidAt, serviceTitle).
+   473→- Tested via curl: create 201, verify 200 (payment.paid, booking.paymentStatus=paid, booking.status auto-confirmed), duplicate create 409 "already paid", DB verified Payment row with paid status + transactionId.
+   474→
+   475→Stage Summary:
+   476→- Complete mock payment gateway: create intent → verify → mark paid + auto-confirm booking. Real Razorpay/Stripe would slot in here.
+   477→
+   478→---
+   479→Task ID: 7-b
+   480→Agent: main
+   481→Task: Phase 7 (part 2) — Build PaymentButton component (mock checkout modal)
+   482→
+   483→Work Log:
+   484→- Created src/components/site/payment-button.tsx: 3-stage flow (checkout → processing → success).
+   485→  * Checkout: Dialog with order summary (service title, booking ID, amount), card form (name, number pre-filled with 4242 test card, expiry, CVC), "Pay ₹X" button, security badges.
+   486→  * Processing: Spinner + "Processing payment..." + "Verifying with your bank".
+   487→  * Success: Green checkmark + amount + receipt (service, amount, method, transaction ID, date) + Done button.
+   488→- Flow: create payment → 1.2s delay → verify → success state + toast + router.refresh().
+   489→- Handles errors (API errors, network errors) with toast + return to checkout stage.
+   490→
+   491→Stage Summary:
+   492→- Realistic checkout experience with card form, processing animation, and receipt. Test card pre-filled.
+   493→
+   494→---
+   495→Task ID: 7-c
+   496→Agent: main
+   497→Task: Phase 7 (part 3) — Add PaymentButton to customer dashboard/bookings
+   498→
+   499→Work Log:
+   500→- Updated src/app/(customer)/dashboard/bookings/page.tsx: added PaymentButton (compact variant) for bookings with paymentStatus=pending AND status!=cancelled. Shows alongside Cancel button in a flex row.
+   501→- Verified: unpaid non-cancelled bookings show "Pay now" button. Paid bookings show "Paid" badge + no Pay button. Cancelled bookings show no Pay button.
+   502→
+   503→Stage Summary:
+   504→- Customers can pay for pending bookings directly from their bookings list.
+   505→
+   506→---
+   507→Task ID: 7-d
+   508→Agent: main
+   509→Task: Phase 7 (part 4) — Add Pay now option to booking success state
+   510→
+   511→Work Log:
+   512→- Updated src/components/site/booking-form.tsx success state: added amber "Complete your payment now" CTA box with PaymentButton (full variant). Shows after booking creation so customer can pay immediately.
+   513→- Reordered buttons: Pay now CTA (primary) → View my bookings (outline) → Browse more services (ghost).
+   514→
+   515→Stage Summary:
+   516→- Customer can pay immediately after creating a booking, or later from dashboard/bookings.
+   517→
+   518→---
+   519→Task ID: 7-e
+   520→Agent: main
+   521→Task: Phase 7 (part 5) — Verify payment status reflects everywhere
+   522→
+   523→Work Log:
+   524→- Customer dashboard overview: "Total spent" stat now shows ₹998 (sum of paid bookings) — was ₹0 before payments.
+   525→- Customer dashboard/bookings: payment badges show "Paid" (2) + "Payment pending" (1). Pay now buttons only on unpaid non-cancelled bookings.
+   526→- Admin dashboard: "Total revenue" shows ₹499 (first payment) then ₹998 (after second payment).
+   527→- Admin bookings: payment status column shows "Paid" for paid bookings.
+   528→- Payment flow in browser: checkout dialog opens → card form pre-filled → submit → processing → success with receipt → close → list updates (badge changes to Paid, Pay button disappears).
+   529→
+   530→Stage Summary:
+   531→- Payment status is consistent across customer dashboard, admin dashboard, and admin bookings. Revenue stats update in real-time.
+   532→
+   533→---
+   534→Task ID: 7-f
+   535→Agent: main
+   536→Task: Phase 7 (part 6) — Lint + verify full payment flow
+   537→
+   538→Work Log:
+   539→- Lint clean. All routes 200/201.
+   540→- Verified via curl: create payment 201, verify 200 (payment.paid + booking.paymentStatus=paid + auto-confirm), duplicate 409, DB confirms Payment row paid.
+   541→- Verified via browser: Pay now button opens checkout dialog (Secure checkout, Test mode, card form pre-filled with 4242), submit → processing spinner → success state with receipt (₹499, Home Cleaning, transaction ID, date), Done button closes dialog, bookings list auto-updates (badge → Paid, Pay button removed), dashboard total spent increases.
+   542→- Admin sees: revenue ₹998, bookings with Paid badges.
+   543→- Screenshots: phase7-checkout-dialog.png, phase7-my-bookings-paid.png.
+   544→
+   545→Stage Summary:
+   546→- Phase 7 fully complete and browser-verified. Mock payment flow works end-to-end: create booking → pay now (or from dashboard) → checkout → processing → success + receipt → status updates everywhere. Ready for Phase 8 (n8n automation).
+   547→
+   548→---
+   549→Task ID: 10-a
+   550→Agent: general-purpose
+   551→Task: Write professional README.md for ServiceBook AI
+   552→
+   553→Work Log:
+   554→- Read shared worklog at /home/z/my-project/worklog.md (546 lines, full project history from Phase 1 through Phase 7) to understand actual implemented stack and feature set.
+   555→- Verified actual project structure (LS of /home/z/my-project) and read package.json + prisma/schema.prisma to confirm the real tech stack: Next.js 16, TypeScript, Tailwind 4, shadcn/ui, Prisma+SQLite, jose JWT auth, bcryptjs, mock payment gateway, n8n webhooks, framer-motion, next-themes.
+   556→- Cross-checked API route files present in src/app/api/* against the route list in the task brief — all 16 routes confirmed present (auth, bookings, payments, admin/*, leads, services, webhooks/booking-notification).
+   557→- Wrote complete README.md (454 lines) to /home/z/my-project/README.md following the exact structure specified: badges, tagline, screenshots placeholder, live demo placeholder, features (Public/Customer/Admin/Payments/Automation), tech stack table, setup instructions, demo logins table, database setup, env vars table, n8n setup (3 workflows + callback), deployment (Vercel + Postgres swap + n8n self-host), full API routes table, project structure tree with available scripts, future improvements, MIT license, author placeholder.
+   558→- Kept demo logins prominent (Admin: admin@servicebook.com/admin123, Customer: customer@servicebook.com/customer123) with a "Quick test flow" callout so Upwork recruiters can test immediately.
+   559→- Used emojis for section headers as instructed, no Z.ai branding, all commands and code blocks are real (not placeholders).
+   560→- Appended this work record to /home/z/my-project/worklog.md in append mode (did not overwrite).
+   561→
+   562→Stage Summary:
+   563→- Produced a 454-line professional README.md at /home/z/my-project/README.md — comprehensive but not bloated, within the 300-500 line target.
+   564→- README reflects the ACTUAL implemented stack (not the original JS/Supabase request) and all features built across Phases 1-7.
+   565→- Ready for the student to drop in screenshots, their name, and their Upwork profile link before publishing to GitHub for portfolio use.
+   566→

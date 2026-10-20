@@ -1,5 +1,6 @@
 import { db } from "@/lib/db"
 import { ok, fail, isValidEmail, isValidPhone } from "@/lib/api"
+import { forwardLeadToN8n } from "@/lib/n8n"
 
 // POST /api/leads
 // Body: { name, email, phone, message, source? }
@@ -35,8 +36,16 @@ export async function POST(request: Request) {
       data: { name, email, phone, message, source },
     })
 
-    // Phase 8 will forward to n8n webhook here:
-    //   await forwardToN8n("lead", lead)
+    // --- Forward lead data to n8n (non-blocking) ---
+    await forwardLeadToN8n({
+      leadId: lead.id,
+      name: lead.name,
+      email: lead.email,
+      phone: lead.phone,
+      message: lead.message,
+      source: lead.source,
+      createdAt: lead.createdAt.toISOString(),
+    })
 
     return ok(lead, 201)
   } catch (error) {
