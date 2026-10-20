@@ -13,19 +13,46 @@ import {
   Wind,
   Scissors,
   GraduationCap,
+  Quote,
 } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { siteConfig } from "@/lib/site"
+import { getActiveServices } from "@/lib/services"
+import { ServiceCard } from "@/components/site/service-card"
 
-// Small static data used only for the hero preview.
-// Real services will come from the database in Phase 2/3.
+// Small static data used only for the hero preview card.
 const previewServices = [
   { icon: HomeIcon, label: "Home Cleaning", price: "₹499" },
   { icon: Wind, label: "AC Repair", price: "₹699" },
   { icon: Scissors, label: "Salon at Home", price: "₹899" },
   { icon: GraduationCap, label: "Math Tutoring", price: "₹399" },
+]
+
+// Testimonials shown on the home page. Static for now.
+const testimonials = [
+  {
+    name: "Priya Sharma",
+    role: "Working professional, Bengaluru",
+    quote:
+      "Booking a salon-at-home session took under two minutes. The beautician was on time, professional, and the service was excellent. Will definitely use again!",
+    initials: "PS",
+  },
+  {
+    name: "Rahul Verma",
+    role: "Homeowner, Pune",
+    quote:
+      "My AC stopped cooling on a Sunday. ServiceBook had a technician at my door in 90 minutes. Fair price, honest diagnosis, fully repaired. Highly recommend.",
+    initials: "RV",
+  },
+  {
+    name: "Anita Desai",
+    role: "Parent, Mumbai",
+    quote:
+      "The math tutoring sessions have completely changed my son's confidence. The tutor is patient and the booking system sends helpful reminders. Great platform.",
+    initials: "AD",
+  },
 ]
 
 const steps = [
@@ -206,6 +233,9 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* ===== Services preview ===== */}
+      <ServicesPreview />
+
       {/* ===== How it works ===== */}
       <section className="border-t border-border/60 bg-muted/20">
         <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
@@ -274,6 +304,61 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* ===== Testimonials ===== */}
+      <section className="border-t border-border/60 bg-muted/20">
+        <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
+          <div className="mx-auto max-w-2xl text-center">
+            <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
+              Loved by customers
+            </h2>
+            <p className="mt-3 text-muted-foreground">
+              Real stories from people who book their services with us every
+              week.
+            </p>
+          </div>
+
+          <div className="mt-12 grid gap-6 md:grid-cols-3">
+            {testimonials.map((t) => (
+              <Card key={t.name} className="h-full">
+                <CardContent className="p-6">
+                  <Quote className="size-8 text-primary/30" />
+                  <p className="mt-3 text-sm leading-relaxed text-foreground">
+                    &ldquo;{t.quote}&rdquo;
+                  </p>
+                  <div className="mt-5 flex items-center gap-3 border-t border-border/70 pt-4">
+                    <span className="flex size-10 items-center justify-center rounded-full bg-primary text-sm font-semibold text-primary-foreground">
+                      {t.initials}
+                    </span>
+                    <div>
+                      <p className="text-sm font-semibold">{t.name}</p>
+                      <p className="text-xs text-muted-foreground">{t.role}</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+
+          <div className="mt-10 flex flex-wrap items-center justify-center gap-x-8 gap-y-3 text-sm text-muted-foreground">
+            <span className="flex items-center gap-1.5">
+              <Star className="size-4 fill-amber-400 text-amber-400" />
+              <span className="font-semibold text-foreground">4.9/5</span>
+              average rating
+            </span>
+            <span className="hidden sm:inline text-border">|</span>
+            <span>
+              <span className="font-semibold text-foreground">5,000+</span>{" "}
+              happy customers
+            </span>
+            <span className="hidden sm:inline text-border">|</span>
+            <span>
+              <span className="font-semibold text-foreground">12,000+</span>{" "}
+              bookings completed
+            </span>
+          </div>
+        </div>
+      </section>
+
       {/* ===== CTA ===== */}
       <section className="border-t border-border/60 bg-primary text-primary-foreground">
         <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
@@ -312,5 +397,43 @@ export default function HomePage() {
         </div>
       </section>
     </>
+  )
+}
+
+// Services preview section — shows up to 3 popular services on the home page.
+// Reads from the same mock data layer the Services page uses (Phase 3 swaps to DB).
+function ServicesPreview() {
+  const services = getActiveServices().slice(0, 3)
+
+  if (services.length === 0) return null
+
+  return (
+    <section className="border-t border-border/60">
+      <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
+        <div className="flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-end">
+          <div className="max-w-2xl">
+            <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
+              Popular services
+            </h2>
+            <p className="mt-3 text-muted-foreground">
+              Start with our most-booked services. Transparent pricing, verified
+              professionals, instant confirmation.
+            </p>
+          </div>
+          <Button asChild variant="outline" className="shrink-0">
+            <Link href="/services">
+              View all services
+              <ArrowRight className="size-4" />
+            </Link>
+          </Button>
+        </div>
+
+        <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          {services.map((service) => (
+            <ServiceCard key={service.id} service={service} />
+          ))}
+        </div>
+      </div>
+    </section>
   )
 }
