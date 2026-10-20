@@ -29,7 +29,11 @@ export const metadata: Metadata = {
   ],
   authors: [{ name: "ServiceBook AI" }],
   icons: {
-    icon: "/logo.svg",
+    icon: [
+      { url: "/icon.svg", type: "image/svg+xml" },
+      { url: "/logo.svg", type: "image/svg+xml" },
+    ],
+    apple: [{ url: "/apple-icon.svg", type: "image/svg+xml" }],
   },
   openGraph: {
     title: "ServiceBook AI — Book Trusted Local Services Online",
