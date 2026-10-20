@@ -401,9 +401,9 @@ export default function HomePage() {
 }
 
 // Services preview section — shows up to 3 popular services on the home page.
-// Reads from the same mock data layer the Services page uses (Phase 3 swaps to DB).
-function ServicesPreview() {
-  const services = getActiveServices().slice(0, 3)
+// Reads from the database (Phase 3). Async server component.
+async function ServicesPreview() {
+  const services = (await getActiveServices()).slice(0, 3)
 
   if (services.length === 0) return null
 

@@ -20,30 +20,29 @@ import { Card, CardContent } from "@/components/ui/card"
 import { ServiceCard } from "@/components/site/service-card"
 
 // Pre-generate the static params for each service (helps SEO + perf).
-export function generateStaticParams() {
-  return getActiveServices().map((s) => ({ id: s.id }))
+export async function generateStaticParams() {
+  const services = await getActiveServices()
+  return services.map((s) => ({ id: s.id }))
 }
 
 // Per-service metadata for SEO.
-export function generateMetadata({
+export async function generateMetadata({
   params,
 }: {
   params: Promise<{ id: string }>
 }): Promise<Metadata> {
-  // We await params because Next 16 makes dynamic params async.
-  return params.then((p) => {
-    const service = getServiceById(p.id)
-    if (!service) {
-      return { title: "Service not found — ServiceBook AI" }
-    }
-    return {
-      title: `${service.title} — ServiceBook AI`,
-      description: service.shortDescription,
-    }
-  })
+  const { id } = await params
+  const service = await getServiceById(id)
+  if (!service) {
+    return { title: "Service not found — ServiceBook AI" }
+  }
+  return {
+    title: `${service.title} — ServiceBook AI`,
+    description: service.shortDescription,
+  }
 }
 
-// What's included list — derived from the description for a cleaner UI.
+// What's included list — shown on every service for a cleaner UI.
 const includedItems = [
   "Verified & background-checked professional",
   "All tools and materials included",
@@ -58,18 +57,19 @@ export default async function ServiceDetailPage({
   params: Promise<{ id: string }>
 }) {
   const { id } = await params
-  const service = getServiceById(id)
+  const service = await getServiceById(id)
 
   if (!service) {
     notFound()
   }
 
   // Related services (same category, exclude current).
-  const related = getActiveServices()
+  const allActive = await getActiveServices()
+  const related = allActive
     .filter((s) => s.category === service.category && s.id !== service.id)
     .slice(0, 3)
   // Fallback: if no siblings, show other categories.
-  const fallback = getActiveServices().filter((s) => s.id !== service.id).slice(0, 3)
+  const fallback = allActive.filter((s) => s.id !== service.id).slice(0, 3)
   const relatedServices = related.length > 0 ? related : fallback
 
   return (

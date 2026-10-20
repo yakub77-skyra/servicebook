@@ -99,3 +99,79 @@ Work Log:
 
 Stage Summary:
 - Phase 2 fully complete and browser-verified. All public UI pages built with mock data (ready to swap to Prisma DB in Phase 3). Ready for user confirmation before Phase 3.
+
+---
+Task ID: 3-a
+Agent: main
+Task: Phase 3 (part 1) — Write Prisma schema (5 tables) + install bcryptjs + run db:push
+
+Work Log:
+- Installed bcryptjs (+ @types/bcryptjs) for hashing demo user passwords.
+- Wrote prisma/schema.prisma with 5 models: Profile (id/email/name/phone/role/password + password field added for credential auth), Service (id/title/slug/shortDescription/description/price/durationMinutes/imageUrl/category/rating/reviewCount/isActive), Booking (id/customerId/serviceId/bookingDate/bookingTime/status/paymentStatus/notes + relations to Profile+Service+Payment), Payment (id/bookingId/amount/paymentMethod/paymentStatus/transactionId + relation to Booking), Lead (id/name/email/phone/message/source). SQLite has no enums so role/status are String with app-layer validation. bookingDate/bookingTime stored as String (YYYY-MM-DD / HH:mm) for timezone-safe querying.
+- Ran `bun run db:push` — database in sync, Prisma Client generated.
+
+Stage Summary:
+- All 5 tables created in SQLite. Relations (Profile↔Booking, Service↔Booking, Booking↔Payment) with Cascade deletes configured.
+
+---
+Task ID: 3-b
+Agent: main
+Task: Phase 3 (part 2) — Create + run seed script (4 services + 2 demo users with hashed passwords)
+
+Work Log:
+- Created prisma/seed.ts: upserts 4 services (Home Cleaning ₹499/60min, AC Repair ₹699/45min, Salon at Home ₹899/90min, Math Tutoring ₹399/60min) with real image URLs, categories, ratings, review counts. Upserts 2 demo users: admin@servicebook.com (admin/admin123) and customer@servicebook.com (customer/customer123), passwords hashed with bcrypt (10 rounds). Safe to re-run (upsert by unique email/slug).
+- Added `db:seed` script to package.json.
+- Ran `bun run db:seed` — all 6 records created.
+- Verified data via direct Prisma query: 4 services + 2 users confirmed in DB.
+
+Stage Summary:
+- Demo logins ready for Phase 4 auth: admin@servicebook.com/admin123 (role:admin), customer@servicebook.com/customer123 (role:customer).
+
+---
+Task ID: 3-c
+Agent: main
+Task: Phase 3 (part 3) — Build API routes (/api/services GET, /api/leads POST) with validation
+
+Work Log:
+- Created src/lib/api.ts (ok/fail response helpers, isValidEmail, isValidPhone validators).
+- Built src/app/api/services/route.ts (GET): returns active services, supports ?category= filter, ordered by createdAt.
+- Built src/app/api/leads/route.ts (POST): validates name/email/phone/message, creates Lead record, returns 201 on success / 422 on validation error. Has placeholder comment for Phase 8 n8n webhook forwarding.
+- Tested via curl: GET /api/services returns 4 services; ?category=Cleaning returns 1; POST /api/leads with valid data returns 201 + created lead; invalid email returns 422; missing name returns 422; short message returns 422.
+
+Stage Summary:
+- Two API routes working with full validation. Lead POST persists to DB (verified count goes 1→2).
+
+---
+Task ID: 3-d
+Agent: main
+Task: Phase 3 (part 4) — Swap mock services for real Prisma queries + wire contact form to /api/leads
+
+Work Log:
+- Rewrote src/lib/services.ts to use Prisma (db import). Functions now async: getActiveServices(), getServiceCategories(), getServiceById(idOrSlug) — looks up by id OR slug. Re-exports Service type from @prisma/client. Signatures match old mock versions except async.
+- Updated src/app/(public)/services/page.tsx: now async server component, awaits getActiveServices() + getServiceCategories() via Promise.all.
+- Updated src/app/(public)/services/[id]/page.tsx: generateStaticParams, generateMetadata, and page all async; await getServiceById + getActiveServices. Related services query works.
+- Updated src/app/(public)/page.tsx: ServicesPreview is now async, awaits getActiveServices().
+- Updated src/components/site/contact-form.tsx: replaced simulated 900ms delay with real fetch POST to /api/leads. Handles success (201→success state+toast), validation error (422→destructive toast with API error message), network error (destructive toast).
+- Fixed stale-cache compile error (dev server recompiled on next request → 200).
+
+Stage Summary:
+- All public pages now read from the real database. Contact form saves real leads. Mock data layer fully replaced.
+
+---
+Task ID: 3-e
+Agent: main
+Task: Phase 3 (part 5) — Lint + verify DB-backed pages and API routes with Agent Browser
+
+Work Log:
+- `bun run lint` — clean.
+- Agent Browser verification:
+  * Home: renders 4 DB-backed services in "Popular services" section, no errors.
+  * Services: "4 services available" count from DB, all 4 service cards render, category filter works.
+  * Service detail: navigated from services page (click View details) → renders title, Book this service button, What's included, related services. Note: old mock IDs (srv_ac_repair) now 404 as expected; real DB CUIDs work.
+  * Contact form: filled valid data → "Thank you!" success state. Verified DB: lead count 1→2, new lead "Anita Patel" persisted with correct message.
+  * API validation: short message → 422 "Message should be at least 10 characters".
+- Dev log: POST /api/leads 201 (success) + 422 (validation) both logged correctly.
+- Saved screenshots: phase3-services-db.png, phase3-contact.png.
+
+Stage Summary:
+- Phase 3 fully complete and browser-verified. Database layer live: 5 tables, seed data, 2 API routes, all public pages DB-backed, contact form persists real leads. Ready for Phase 4 (authentication).

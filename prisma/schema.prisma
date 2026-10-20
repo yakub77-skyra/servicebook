@@ -1,8 +1,7 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+// ServiceBook AI — Prisma schema
+// 5 tables: Profile, Service, Booking, Payment, Lead
+// Note: SQLite has no native enum/array types, so role/status fields are
+// stored as String and validated at the application layer.
 
 generator client {
   provider = "prisma-client-js"
@@ -13,20 +12,79 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model User {
+// A user profile. role can be "customer" or "admin".
+// password stores a bcrypt hash (used by the credentials auth in Phase 4).
+model Profile {
   id        String   @id @default(cuid())
   email     String   @unique
-  name      String?
+  name      String
+  phone     String?
+  role      String   @default("customer") // "customer" | "admin"
+  password  String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  bookings Booking[]
 }
 
-model Post {
+model Service {
+  id               String   @id @default(cuid())
+  title            String
+  slug             String   @unique
+  shortDescription String
+  description      String
+  price            Int
+  durationMinutes  Int
+  imageUrl         String
+  category         String
+  rating           Float    @default(4.5)
+  reviewCount      Int      @default(0)
+  isActive         Boolean  @default(true)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  bookings Booking[]
+}
+
+// Booking statuses: pending | confirmed | cancelled | completed
+// Payment statuses: pending | paid | failed
+// bookingDate is stored as "YYYY-MM-DD" and bookingTime as "HH:mm" for
+// simple, timezone-safe querying in SQLite.
+model Booking {
+  id            String   @id @default(cuid())
+  customerId    String
+  serviceId     String
+  bookingDate   String
+  bookingTime   String
+  status        String   @default("pending")
+  paymentStatus String   @default("pending")
+  notes         String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  customer Profile  @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  service  Service  @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+  payments Payment[]
+}
+
+model Payment {
+  id            String   @id @default(cuid())
+  bookingId     String
+  amount        Int
+  paymentMethod String   @default("card")
+  paymentStatus String   @default("pending")
+  transactionId String?
+  createdAt     DateTime @default(now())
+
+  booking Booking @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+}
+
+model Lead {
   id        String   @id @default(cuid())
-  title     String
-  content   String?
-  published Boolean  @default(false)
-  authorId  String
+  name      String
+  email     String
+  phone     String?
+  message   String
+  source    String   @default("contact_form")
   createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
 }

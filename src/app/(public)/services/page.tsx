@@ -9,9 +9,11 @@ export const metadata: Metadata = {
     "Browse trusted local services — home cleaning, AC repair, salon at home, math tutoring and more. Book online in minutes.",
 }
 
-export default function ServicesPage() {
-  const services = getActiveServices()
-  const categories = getServiceCategories()
+export default async function ServicesPage() {
+  const [services, categories] = await Promise.all([
+    getActiveServices(),
+    getServiceCategories(),
+  ])
 
   return (
     <>

@@ -60,18 +60,51 @@ export function ContactForm() {
 
     setSubmitting(true)
 
-    // Phase 2: simulate a successful submission.
-    // Phase 3/8 will POST to /api/leads (which also forwards to n8n).
-    await new Promise((r) => setTimeout(r, 900))
+    // Phase 3: POST the lead to the database via /api/leads.
+    // Phase 8 will also forward this to an n8n lead-capture webhook.
+    try {
+      const res = await fetch("/api/leads", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: String(data.get("name") ?? "").trim(),
+          email: String(data.get("email") ?? "").trim(),
+          phone: String(data.get("phone") ?? "").trim(),
+          message: String(data.get("message") ?? "").trim(),
+          source: "contact_form",
+        }),
+      })
 
-    setSubmitting(false)
-    setDone(true)
-    form.reset()
+      const json = await res.json()
 
-    toast({
-      title: "Message sent!",
-      description: "Our team will get back to you within 24 hours.",
-    })
+      if (!res.ok || !json.success) {
+        const msg = json?.error || "Something went wrong. Please try again."
+        setSubmitting(false)
+        toast({
+          title: "Could not send message",
+          description: msg,
+          variant: "destructive",
+        })
+        return
+      }
+
+      setSubmitting(false)
+      setDone(true)
+      form.reset()
+
+      toast({
+        title: "Message sent!",
+        description: "Our team will get back to you within 24 hours.",
+      })
+    } catch (err) {
+      console.error("[contact form] submit error:", err)
+      setSubmitting(false)
+      toast({
+        title: "Network error",
+        description: "Please check your connection and try again.",
+        variant: "destructive",
+      })
+    }
   }
 
   if (done) {
