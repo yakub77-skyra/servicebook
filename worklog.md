@@ -358,3 +358,106 @@ Work Log:
 
 Stage Summary:
 - Phase 5 fully complete and verified. Booking flow works end-to-end: browse → select service → pick date/time → create booking → view in dashboard → cancel if needed. All validation, auth guards, and double-booking prevention working. Ready for Phase 6 (admin dashboard CRUD).
+
+---
+Task ID: 6-a
+Agent: main
+Task: Phase 6 (part 1) — Build admin API routes with requireAdmin guard
+
+Work Log:
+- Created src/lib/admin.ts (requireAdminOrDeny helper for route handlers).
+- Created 7 admin API routes:
+  * /api/admin/stats GET — total/pending/confirmed/completed/cancelled bookings, totalCustomers, totalRevenue (sum of paid payments), recent 5 bookings with customer+service.
+  * /api/admin/services GET (all services incl inactive) + POST (create with auto-slug, full validation).
+  * /api/admin/services/[id] GET + PATCH (partial update, slug regen on title change) + DELETE (cascade-deletes bookings, returns cascadedBookings count).
+  * /api/admin/bookings GET (all bookings with customer+service, optional ?status= filter).
+  * /api/admin/bookings/[id] PATCH (change status — validates against pending/confirmed/cancelled/completed).
+  * /api/admin/customers GET (all customers with computed bookingCount + totalSpent).
+  * /api/admin/leads GET (all leads newest first).
+- Tested via curl: all routes 401 without auth, 200 with admin auth. Customer → admin routes = 401 (role guard). Stats return correct counts. Service create works. Booking status change works (pending→confirmed→completed). Invalid status rejected. Toggle service active works.
+
+Stage Summary:
+- Complete admin API layer with auth guards + role checks. All CRUD + status management working.
+
+---
+Task ID: 6-b
+Agent: main
+Task: Phase 6 (part 2) — Rebuild admin dashboard with real stats
+
+Work Log:
+- Rewrote src/app/(admin)/admin/dashboard/page.tsx: fetches 8 parallel DB queries (totalBookings, pendingBookings, completedBookings, totalCustomers, totalServices, activeServices, paidPayments, recentBookings). 4 stat cards (Total bookings, Total revenue, Customers, Active services). 3 quick-action cards. Recent bookings table (6 most recent with customer/service/date/status/payment badges). dynamic=force-dynamic.
+- Verified: shows "3 total bookings, 2 pending, ₹0 revenue, 2 customers, 5/5 active services". After status change: "1 pending, 1 completed".
+
+Stage Summary:
+- Admin dashboard shows live data. Stats update after booking status changes.
+
+---
+Task ID: 6-c
+Agent: main
+Task: Phase 6 (part 3) — Build admin services page with full CRUD
+
+Work Log:
+- Created src/components/site/service-form-dialog.tsx (Dialog with form: title, price, duration, category, imageUrl, shortDescription, description, isActive switch. Handles both create (POST) and edit (PATCH). Validation + loading + toast + router.refresh).
+- Created src/components/site/service-actions-core.tsx: DeleteServiceButton (AlertDialog confirm → DELETE API → toast with cascadedBookings count) + ToggleServiceActive (Switch → PATCH isActive → toast).
+- Created src/components/site/services-table.tsx (client component: receives services as props, renders table with image/title/category/price/duration/active-toggle/edit/delete, empty state, add button, shared edit dialog).
+- Rewrote src/app/(admin)/admin/services/page.tsx (server component reads from DB, passes to ServicesTable).
+- Verified: 4 services render with toggle switches + edit + delete buttons. Add service dialog opens. Service create via API works (auto-slug). Delete via API works (cascade). Toggle active via API works.
+
+Stage Summary:
+- Full service CRUD: add, edit, delete (with cascade), toggle active. All with confirmation dialogs and toasts.
+
+---
+Task ID: 6-d
+Agent: main
+Task: Phase 6 (part 4) — Build admin bookings page with status change
+
+Work Log:
+- Created src/components/site/booking-status-selector.tsx (DropdownMenu with 4 status options, checkmark on current, PATCH API call, toast, router.refresh).
+- Rewrote src/app/(admin)/admin/bookings/page.tsx: server component, fetches all bookings with customer+service, status count chips (all/pending/confirmed/completed/cancelled), table with customer/service/date/price/status-selector/payment-badge. Empty state.
+- Verified: bookings render with status dropdowns. Status change via API works (pending→confirmed→completed). Invalid status rejected. Dashboard stats update after change.
+
+Stage Summary:
+- Admin can view all bookings and change status inline via dropdown.
+
+---
+Task ID: 6-e
+Agent: main
+Task: Phase 6 (part 5) — Build admin customers page
+
+Work Log:
+- Rewrote src/app/(admin)/admin/customers/page.tsx: server component, fetches all customer profiles with bookings, computes bookingCount + totalSpent (sum of completed bookings), table with avatar/name/contact/joined-date/booking-count/total-spent. Empty state.
+- Verified: shows Priya Sharma + Rahul Test with correct booking counts.
+
+Stage Summary:
+- Admin can view all customers with their booking history and total spend.
+
+---
+Task ID: 6-f
+Agent: main
+Task: Phase 6 (part 6) — Enhance admin leads page
+
+Work Log:
+- Rewrote src/app/(admin)/admin/leads/page.tsx: clean table layout (name, contact with mailto link, message preview, source badge, received date+time). Empty state. Takes 200 most recent.
+- Verified: shows Anita Patel + Test User leads with correct data.
+
+Stage Summary:
+- Leads page now uses a compact table format with clickable email links.
+
+---
+Task ID: 6-g
+Agent: main
+Task: Phase 6 (part 7) — Lint + verify all admin pages
+
+Work Log:
+- Lint clean. All routes 200.
+- Verified admin API auth guards: all 5 routes return 401 without auth, 200 with admin auth, 401 for customer (role guard).
+- Verified admin dashboard: 4 stat cards with real data, recent bookings table with status badges.
+- Verified admin services: 4 services with toggle/edit/delete, Add dialog opens, CRUD via API works.
+- Verified admin bookings: status count chips, table with inline status dropdown, status change works (pending→confirmed→completed).
+- Verified admin customers: 2 customers with booking counts and total spent.
+- Verified admin leads: leads in table format with correct data.
+- Deleted a test service (created via curl with invalid image URL) that caused a stale next/image error.
+- Screenshots: phase6-admin-dashboard.png, phase6-admin-services.png, phase6-admin-bookings.png, phase6-admin-customers.png, phase6-admin-leads.png.
+
+Stage Summary:
+- Phase 6 fully complete and browser-verified. Full admin dashboard: stats overview, service CRUD, booking status management, customer list, leads table. All API routes guarded with requireAdmin. Ready for Phase 7 (payment test flow).

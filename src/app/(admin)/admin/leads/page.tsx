@@ -1,7 +1,8 @@
-import { MessageSquare, Mail, Phone, Calendar } from "lucide-react"
+import { format } from "date-fns"
+import { MessageSquare, Mail, Phone, Calendar, ExternalLink } from "lucide-react"
 
 import { db } from "@/lib/db"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 
 export const dynamic = "force-dynamic"
@@ -9,7 +10,7 @@ export const dynamic = "force-dynamic"
 export default async function AdminLeadsPage() {
   const leads = await db.lead.findMany({
     orderBy: { createdAt: "desc" },
-    take: 100,
+    take: 200,
   })
 
   return (
@@ -17,7 +18,7 @@ export default async function AdminLeadsPage() {
       <div>
         <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">Leads</h1>
         <p className="mt-1 text-muted-foreground">
-          Contact form submissions from the website.
+          Contact form submissions captured from the website.
         </p>
       </div>
 
@@ -38,47 +39,65 @@ export default async function AdminLeadsPage() {
           </p>
         </div>
       ) : (
-        <div className="grid gap-4">
-          {leads.map((lead) => (
-            <Card key={lead.id}>
-              <CardHeader>
-                <CardTitle className="flex flex-wrap items-center justify-between gap-2 text-base">
-                  <span>{lead.name}</span>
-                  <Badge variant="outline" className="text-xs font-normal">
-                    {lead.source}
-                  </Badge>
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <div className="flex flex-wrap gap-x-6 gap-y-1.5 text-sm">
-                  <span className="flex items-center gap-1.5 text-muted-foreground">
-                    <Mail className="size-3.5" />
-                    {lead.email}
-                  </span>
-                  {lead.phone && (
-                    <span className="flex items-center gap-1.5 text-muted-foreground">
-                      <Phone className="size-3.5" />
-                      {lead.phone}
-                    </span>
-                  )}
-                  <span className="flex items-center gap-1.5 text-muted-foreground">
-                    <Calendar className="size-3.5" />
-                    {new Date(lead.createdAt).toLocaleString("en-IN", {
-                      day: "numeric",
-                      month: "short",
-                      year: "numeric",
-                      hour: "2-digit",
-                      minute: "2-digit",
-                    })}
-                  </span>
-                </div>
-                <p className="rounded-lg bg-muted/40 px-3 py-2 text-sm">
-                  {lead.message}
-                </p>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+        <Card className="overflow-hidden p-0">
+          <CardContent className="p-0">
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead className="bg-muted/40">
+                  <tr className="text-left text-xs uppercase tracking-wide text-muted-foreground">
+                    <th className="px-4 py-3 font-medium">Name</th>
+                    <th className="px-4 py-3 font-medium">Contact</th>
+                    <th className="px-4 py-3 font-medium">Message</th>
+                    <th className="px-4 py-3 font-medium">Source</th>
+                    <th className="px-4 py-3 font-medium">Received</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {leads.map((lead) => (
+                    <tr key={lead.id} className="border-t border-border align-top">
+                      <td className="px-4 py-3">
+                        <p className="font-medium">{lead.name}</p>
+                      </td>
+                      <td className="px-4 py-3">
+                        <a
+                          href={`mailto:${lead.email}`}
+                          className="flex items-center gap-1.5 text-xs text-primary hover:underline"
+                        >
+                          <Mail className="size-3.5" />
+                          {lead.email}
+                        </a>
+                        {lead.phone && (
+                          <p className="mt-0.5 flex items-center gap-1.5 text-xs text-muted-foreground">
+                            <Phone className="size-3.5" />
+                            {lead.phone}
+                          </p>
+                        )}
+                      </td>
+                      <td className="px-4 py-3 max-w-xs">
+                        <p className="line-clamp-3 text-xs text-muted-foreground">
+                          {lead.message}
+                        </p>
+                      </td>
+                      <td className="px-4 py-3">
+                        <Badge variant="outline" className="text-xs">
+                          {lead.source}
+                        </Badge>
+                      </td>
+                      <td className="px-4 py-3">
+                        <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                          <Calendar className="size-3.5" />
+                          {format(lead.createdAt, "d MMM yyyy")}
+                          <br />
+                          {format(lead.createdAt, "h:mm a")}
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </CardContent>
+        </Card>
       )}
     </div>
   )
