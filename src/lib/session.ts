@@ -74,11 +74,17 @@ export async function getSession(): Promise<SessionUser | null> {
 export async function getCurrentUser() {
   const session = await getSession()
   if (!session) return null
-  const profile = await db.profile.findUnique({
-    where: { id: session.userId },
-    select: { id: true, email: true, name: true, phone: true, role: true, createdAt: true },
-  })
-  return profile
+  try {
+    const profile = await db.profile.findUnique({
+      where: { id: session.userId },
+      select: { id: true, email: true, name: true, phone: true, role: true, createdAt: true },
+    })
+    return profile
+  } catch (error) {
+    // DB unavailable (e.g. Vercel without DATABASE_URL) — don't crash pages.
+    console.error("[session] DB unavailable in getCurrentUser:", error)
+    return null
+  }
 }
 
 // --- Route guards (use in protected layouts / pages) ---

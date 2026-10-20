@@ -14,13 +14,19 @@ import { BookingStatusSelector } from "@/components/site/booking-status-selector
 export const dynamic = "force-dynamic"
 
 export default async function AdminBookingsPage() {
-  const bookings = await db.booking.findMany({
-    include: {
-      service: true,
-      customer: { select: { id: true, name: true, email: true, phone: true } },
-    },
-    orderBy: { createdAt: "desc" },
-  })
+  let bookings: Awaited<ReturnType<typeof db.booking.findMany>> = []
+  try {
+    bookings = await db.booking.findMany({
+      include: {
+        service: true,
+        customer: { select: { id: true, name: true, email: true, phone: true } },
+      },
+      orderBy: { createdAt: "desc" },
+    })
+  } catch (error) {
+    console.error("[admin/bookings] DB unavailable, showing empty state:", error)
+    bookings = []
+  }
 
   // Count by status for the summary chips.
   const counts = {

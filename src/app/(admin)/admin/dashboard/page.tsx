@@ -26,35 +26,56 @@ export default async function AdminDashboardPage() {
   const user = await getCurrentUser()
 
   // --- Stats (all in parallel) ---
-  const [
-    totalBookings,
-    pendingBookings,
-    completedBookings,
-    totalCustomers,
-    totalServices,
-    activeServices,
-    paidPayments,
-    recentBookings,
-  ] = await Promise.all([
-    db.booking.count(),
-    db.booking.count({ where: { status: "pending" } }),
-    db.booking.count({ where: { status: "completed" } }),
-    db.profile.count({ where: { role: "customer" } }),
-    db.service.count(),
-    db.service.count({ where: { isActive: true } }),
-    db.payment.findMany({
-      where: { paymentStatus: "paid" },
-      select: { amount: true },
-    }),
-    db.booking.findMany({
-      take: 6,
-      orderBy: { createdAt: "desc" },
-      include: {
-        service: true,
-        customer: { select: { name: true, email: true } },
-      },
-    }),
-  ])
+  // Wrapped in try/catch so a missing/unreachable DB never throws a Digest.
+  let totalBookings = 0
+  let pendingBookings = 0
+  let completedBookings = 0
+  let totalCustomers = 0
+  let totalServices = 0
+  let activeServices = 0
+  let paidPayments: { amount: number }[] = []
+  let recentBookings: Awaited<ReturnType<typeof db.booking.findMany>> = []
+  try {
+    const [
+      _totalBookings,
+      _pendingBookings,
+      _completedBookings,
+      _totalCustomers,
+      _totalServices,
+      _activeServices,
+      _paidPayments,
+      _recentBookings,
+    ] = await Promise.all([
+      db.booking.count(),
+      db.booking.count({ where: { status: "pending" } }),
+      db.booking.count({ where: { status: "completed" } }),
+      db.profile.count({ where: { role: "customer" } }),
+      db.service.count(),
+      db.service.count({ where: { isActive: true } }),
+      db.payment.findMany({
+        where: { paymentStatus: "paid" },
+        select: { amount: true },
+      }),
+      db.booking.findMany({
+        take: 6,
+        orderBy: { createdAt: "desc" },
+        include: {
+          service: true,
+          customer: { select: { name: true, email: true } },
+        },
+      }),
+    ])
+    totalBookings = _totalBookings
+    pendingBookings = _pendingBookings
+    completedBookings = _completedBookings
+    totalCustomers = _totalCustomers
+    totalServices = _totalServices
+    activeServices = _activeServices
+    paidPayments = _paidPayments
+    recentBookings = _recentBookings
+  } catch (error) {
+    console.error("[admin/dashboard] DB unavailable, showing empty stats:", error)
+  }
 
   const totalRevenue = paidPayments.reduce((sum, p) => sum + p.amount, 0)
 
@@ -98,13 +119,13 @@ export default async function AdminDashboardPage() {
             Admin Overview
           </h1>
           <p className="mt-1 text-muted-foreground">
-            Welcome back, {user!.name.split(" ")[0]}. Here&apos;s what&apos;s
-            happening today.
+            Welcome back, {user?.name?.split(" ")[0] ?? "Admin"}. Here&apos;s
+            what&apos;s happening today.
           </p>
         </div>
         <Badge variant="secondary" className="capitalize">
           <span className="mr-1.5 size-1.5 rounded-full bg-emerald-500" />
-          {user!.role} account
+          {user?.role ?? "admin"} account
         </Badge>
       </div>
 

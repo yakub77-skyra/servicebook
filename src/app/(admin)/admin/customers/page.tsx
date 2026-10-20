@@ -9,20 +9,26 @@ import { Badge } from "@/components/ui/badge"
 export const dynamic = "force-dynamic"
 
 export default async function AdminCustomersPage() {
-  const customers = await db.profile.findMany({
-    where: { role: "customer" },
-    select: {
-      id: true,
-      name: true,
-      email: true,
-      phone: true,
-      createdAt: true,
-      bookings: {
-        select: { id: true, status: true, service: { select: { price: true } } },
+  let customers: Awaited<ReturnType<typeof db.profile.findMany>> = []
+  try {
+    customers = await db.profile.findMany({
+      where: { role: "customer" },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        phone: true,
+        createdAt: true,
+        bookings: {
+          select: { id: true, status: true, service: { select: { price: true } } },
+        },
       },
-    },
-    orderBy: { createdAt: "desc" },
-  })
+      orderBy: { createdAt: "desc" },
+    })
+  } catch (error) {
+    console.error("[admin/customers] DB unavailable, showing empty state:", error)
+    customers = []
+  }
 
   // Shape the data: add computed bookingCount + totalSpent.
   const shaped = customers.map((c) => {

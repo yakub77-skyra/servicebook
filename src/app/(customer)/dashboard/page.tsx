@@ -25,11 +25,20 @@ export default async function CustomerDashboardPage() {
   const user = await getCurrentUser()
 
   // --- Stats ---
-  const bookings = await db.booking.findMany({
-    where: { customerId: user!.id },
-    include: { service: true },
-    orderBy: { createdAt: "desc" },
-  })
+  // Never throw a Digest when the DB is unreachable (Vercel without DATABASE_URL).
+  let bookings: Awaited<ReturnType<typeof db.booking.findMany>> = []
+  try {
+    if (user) {
+      bookings = await db.booking.findMany({
+        where: { customerId: user.id },
+        include: { service: true },
+        orderBy: { createdAt: "desc" },
+      })
+    }
+  } catch (error) {
+    console.error("[dashboard] DB unavailable, showing empty state:", error)
+    bookings = []
+  }
 
   const totalBookings = bookings.length
   const activeBookings = bookings.filter(
@@ -74,7 +83,7 @@ export default async function CustomerDashboardPage() {
       {/* Greeting */}
       <div>
         <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">
-          Hi, {user!.name.split(" ")[0]} 👋
+          Hi, {user?.name?.split(" ")[0] ?? "there"} 👋
         </h1>
         <p className="mt-1 text-muted-foreground">
           Welcome to your dashboard. Manage your bookings and profile here.

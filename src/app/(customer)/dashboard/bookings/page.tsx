@@ -27,11 +27,19 @@ export const dynamic = "force-dynamic"
 export default async function MyBookingsPage() {
   const user = await getCurrentUser()
 
-  const bookings = await db.booking.findMany({
-    where: { customerId: user!.id },
-    include: { service: true },
-    orderBy: { createdAt: "desc" },
-  })
+  let bookings: Awaited<ReturnType<typeof db.booking.findMany>> = []
+  try {
+    if (user) {
+      bookings = await db.booking.findMany({
+        where: { customerId: user.id },
+        include: { service: true },
+        orderBy: { createdAt: "desc" },
+      })
+    }
+  } catch (error) {
+    console.error("[dashboard/bookings] DB unavailable, showing empty state:", error)
+    bookings = []
+  }
 
   return (
     <div className="space-y-6">

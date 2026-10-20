@@ -6,9 +6,15 @@ import { ServicesTable } from "@/components/site/services-table"
 export const dynamic = "force-dynamic"
 
 export default async function AdminServicesPage() {
-  const services = await db.service.findMany({
-    orderBy: { createdAt: "asc" },
-  })
+  let services: Awaited<ReturnType<typeof db.service.findMany>> = []
+  try {
+    services = await db.service.findMany({
+      orderBy: { createdAt: "asc" },
+    })
+  } catch (error) {
+    console.error("[admin/services] DB unavailable, showing empty state:", error)
+    services = []
+  }
 
   return (
     <div className="space-y-6">

@@ -8,10 +8,16 @@ import { Badge } from "@/components/ui/badge"
 export const dynamic = "force-dynamic"
 
 export default async function AdminLeadsPage() {
-  const leads = await db.lead.findMany({
-    orderBy: { createdAt: "desc" },
-    take: 200,
-  })
+  let leads: Awaited<ReturnType<typeof db.lead.findMany>> = []
+  try {
+    leads = await db.lead.findMany({
+      orderBy: { createdAt: "desc" },
+      take: 200,
+    })
+  } catch (error) {
+    console.error("[admin/leads] DB unavailable, showing empty state:", error)
+    leads = []
+  }
 
   return (
     <div className="space-y-6">
