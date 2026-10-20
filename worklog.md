@@ -175,3 +175,100 @@ Work Log:
 
 Stage Summary:
 - Phase 3 fully complete and browser-verified. Database layer live: 5 tables, seed data, 2 API routes, all public pages DB-backed, contact form persists real leads. Ready for Phase 4 (authentication).
+
+---
+Task ID: 4-a
+Agent: main
+Task: Phase 4 (part 1) — Install jose + build session library (JWT auth)
+
+Work Log:
+- Installed jose (JWT lib, edge-compatible).
+- Generated AUTH_SECRET and added to .env.
+- Created src/lib/session.ts: signSession (JWT with 7-day expiry), verifySession, getSession (reads HttpOnly cookie via next/headers), getCurrentUser (DB lookup, no password), requireUser (redirect to /login), requireAdmin (redirect to /admin/login), setSessionCookie/clearSessionCookie helpers. Cookie name sb_session, HttpOnly, SameSite=lax, secure in prod.
+
+Stage Summary:
+- Complete session/auth foundation. Works in Route Handlers + Server Components.
+
+---
+Task ID: 4-b
+Agent: main
+Task: Phase 4 (part 2) — Build auth API routes (signup, login, logout, me)
+
+Work Log:
+- src/app/api/auth/signup/route.ts: validates name/email/phone/password, checks email uniqueness, bcrypt-hashes password, creates Profile (role:customer), signs session, sets cookie, returns 201.
+- src/app/api/auth/login/route.ts: validates, finds user, bcrypt-compares password, supports expectedRole param (admin login rejects non-admins with 403), signs session, sets cookie. Generic "Invalid email or password" to prevent account enumeration.
+- src/app/api/auth/logout/route.ts: clears cookie.
+- src/app/api/auth/me/route.ts: returns current user via getCurrentUser.
+- Tested all via curl: signup 201, login 200, logout clears cookie, me returns user, duplicate email 409, wrong password 401, non-admin on admin login 403.
+
+Stage Summary:
+- 4 auth endpoints working with full validation + bcrypt + JWT.
+
+---
+Task ID: 4-c
+Agent: main
+Task: Phase 4 (part 3) — Build Login + Signup pages with forms
+
+Work Log:
+- Created src/components/site/login-form.tsx: email/password fields, show/hide password toggle, validation, loading state, error toast, demo-credential click-to-fill buttons, hard-navigation redirect (window.location.href) after success.
+- Created src/components/site/signup-form.tsx: name/email/phone/password, validation, loading state, redirect to /dashboard.
+- Built /login page (customer login, shows both demo creds, redirects to /dashboard).
+- Built /signup page (2-col: form + perks, redirects to /dashboard).
+- Built /admin/login page (separate route in (auth) group, expectedRole=admin, redirects to /admin/dashboard, robots noindex).
+
+Stage Summary:
+- 3 auth pages with demo-cred hints. Verified: customer login→/dashboard, admin login→/admin/dashboard, wrong password stays + toast, signup creates user + redirects.
+
+---
+Task ID: 4-d
+Agent: main
+Task: Phase 4 (part 4) — Make Navbar auth-aware
+
+Work Log:
+- Created src/hooks/use-current-user.ts (client hook: fetches /api/auth/me on mount + window focus, returns {user, loading}). Chose client-side fetch over server-component cookies() because Next.js 16 dev server caches cookies() unpredictably in Server Components, causing stale logged-out navbar after login.
+- Rewrote src/components/site/navbar.tsx to use useCurrentUser hook. Shows spinner during loading, user dropdown (avatar+name, Dashboard, Log out) when logged in, Log in/Get started when logged out. Mobile sheet menu also auth-aware.
+- Simplified src/components/site/site-header.tsx to just render <Navbar /> (no server-side session fetch).
+- Added export const dynamic = "force-dynamic" to public layout.
+
+Stage Summary:
+- Navbar correctly reflects auth state. Fixed stale-session issue by moving to client-side fetch.
+
+---
+Task ID: 4-e
+Agent: main
+Task: Phase 4 (part 5) — Create protected route groups + dashboards + admin login
+
+Work Log:
+- Created src/components/site/dashboard-sidebar.tsx (reusable client sidebar: fixed desktop + mobile sheet, nav items, user info, logout). Icons passed as string keys (iconMap) to avoid RSC→CC serialization error (functions can't cross the boundary).
+- Created (customer)/layout.tsx: requireUser via getCurrentUser, redirects logged-out→/login, admins→/admin/dashboard. Sidebar with Overview/My Bookings/Profile.
+- Created (admin)/layout.tsx: requireAdmin, redirects logged-out→/admin/login, non-admins→/dashboard. Sidebar with Overview/Services/Bookings/Customers/Leads.
+- Built (customer)/dashboard/page.tsx (greeting + 3 stat cards + empty state CTA), dashboard/bookings/page.tsx (placeholder), dashboard/profile/page.tsx (shows real user info from DB).
+- Built (admin)/admin/dashboard/page.tsx (4 stat cards + quick actions), admin/services|bookings|customers (placeholders for Phase 6), admin/leads/page.tsx (FUNCTIONAL — shows real leads from DB, verified Anita Patel + Test User render).
+- Created (auth)/layout.tsx + (auth)/admin/login/page.tsx (standalone, outside protected admin group).
+
+Stage Summary:
+- Full protected route structure. Customer + Admin dashboards with sidebars. Admin leads page functional with real DB data.
+
+---
+Task ID: 4-f
+Agent: main
+Task: Phase 4 (part 6) — Lint + verify full auth flow with Agent Browser
+
+Work Log:
+- Fixed RSC→CC icon serialization error (passed icon component refs from server layout to client sidebar → switched to string keys + iconMap lookup on client).
+- Fixed logout race condition (added 100ms delay after fetch before window.location.href so cookie persists).
+- Fixed login/signup redirect (replaced router.push+router.refresh with window.location.href hard navigation for reliable cookie re-evaluation).
+- Final browser-verified flow (fresh browser session):
+  * TEST 1: /dashboard logged-out → redirect /login ✓; /admin/dashboard logged-out → redirect /admin/login ✓
+  * TEST 2: Admin login (admin@servicebook.com/admin123) → /admin/dashboard, "Admin Overview" ✓
+  * TEST 3: Admin sidebar → Leads page shows real leads (Anita Patel, Test User) ✓
+  * TEST 4: Admin logout → home, session=null ✓
+  * TEST 5: Customer login (customer@servicebook.com/customer123) → /dashboard, "Hi, Priya 👋" ✓
+  * TEST 6: Customer → /admin/dashboard → redirected to /dashboard (role guard) ✓
+  * TEST 7: Wrong password → stays on /login ✓
+  * TEST 8: Signup new user "Rahul Test" → 201, redirect /dashboard, "Hi, Rahul" ✓ (verified in DB)
+  * TEST 9: Navbar shows user menu when logged in ✓
+- Lint clean. Screenshots: phase4-login.png, phase4-signup.png, phase4-admin-login.png.
+
+Stage Summary:
+- Phase 4 fully complete and browser-verified. Full auth system: signup, login, logout, protected routes, role-based access (customer/admin), session persistence via JWT+HttpOnly cookie. Demo logins work. Ready for Phase 5 (booking flow).
