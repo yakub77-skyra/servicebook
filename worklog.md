@@ -461,3 +461,86 @@ Work Log:
 
 Stage Summary:
 - Phase 6 fully complete and browser-verified. Full admin dashboard: stats overview, service CRUD, booking status management, customer list, leads table. All API routes guarded with requireAdmin. Ready for Phase 7 (payment test flow).
+
+---
+Task ID: 7-a
+Agent: main
+Task: Phase 7 (part 1) — Build payment API routes (mock gateway)
+
+Work Log:
+- Created src/app/api/payments/create/route.ts: POST — requires customer auth, validates bookingId, checks booking ownership, prevents duplicate payments (returns existing pending payment or creates new one), generates transactionId, creates Payment row with status=pending, returns paymentId+transactionId+amount+orderId.
+- Created src/app/api/payments/verify/route.ts: POST — validates paymentId+transactionId, checks ownership + transaction ID match, simulates gateway delay (600ms), uses $transaction to update Payment→paid AND Booking→paymentStatus=paid + auto-confirm (pending→confirmed). Returns receipt data (transactionId, amount, method, paidAt, serviceTitle).
+- Tested via curl: create 201, verify 200 (payment.paid, booking.paymentStatus=paid, booking.status auto-confirmed), duplicate create 409 "already paid", DB verified Payment row with paid status + transactionId.
+
+Stage Summary:
+- Complete mock payment gateway: create intent → verify → mark paid + auto-confirm booking. Real Razorpay/Stripe would slot in here.
+
+---
+Task ID: 7-b
+Agent: main
+Task: Phase 7 (part 2) — Build PaymentButton component (mock checkout modal)
+
+Work Log:
+- Created src/components/site/payment-button.tsx: 3-stage flow (checkout → processing → success).
+  * Checkout: Dialog with order summary (service title, booking ID, amount), card form (name, number pre-filled with 4242 test card, expiry, CVC), "Pay ₹X" button, security badges.
+  * Processing: Spinner + "Processing payment..." + "Verifying with your bank".
+  * Success: Green checkmark + amount + receipt (service, amount, method, transaction ID, date) + Done button.
+- Flow: create payment → 1.2s delay → verify → success state + toast + router.refresh().
+- Handles errors (API errors, network errors) with toast + return to checkout stage.
+
+Stage Summary:
+- Realistic checkout experience with card form, processing animation, and receipt. Test card pre-filled.
+
+---
+Task ID: 7-c
+Agent: main
+Task: Phase 7 (part 3) — Add PaymentButton to customer dashboard/bookings
+
+Work Log:
+- Updated src/app/(customer)/dashboard/bookings/page.tsx: added PaymentButton (compact variant) for bookings with paymentStatus=pending AND status!=cancelled. Shows alongside Cancel button in a flex row.
+- Verified: unpaid non-cancelled bookings show "Pay now" button. Paid bookings show "Paid" badge + no Pay button. Cancelled bookings show no Pay button.
+
+Stage Summary:
+- Customers can pay for pending bookings directly from their bookings list.
+
+---
+Task ID: 7-d
+Agent: main
+Task: Phase 7 (part 4) — Add Pay now option to booking success state
+
+Work Log:
+- Updated src/components/site/booking-form.tsx success state: added amber "Complete your payment now" CTA box with PaymentButton (full variant). Shows after booking creation so customer can pay immediately.
+- Reordered buttons: Pay now CTA (primary) → View my bookings (outline) → Browse more services (ghost).
+
+Stage Summary:
+- Customer can pay immediately after creating a booking, or later from dashboard/bookings.
+
+---
+Task ID: 7-e
+Agent: main
+Task: Phase 7 (part 5) — Verify payment status reflects everywhere
+
+Work Log:
+- Customer dashboard overview: "Total spent" stat now shows ₹998 (sum of paid bookings) — was ₹0 before payments.
+- Customer dashboard/bookings: payment badges show "Paid" (2) + "Payment pending" (1). Pay now buttons only on unpaid non-cancelled bookings.
+- Admin dashboard: "Total revenue" shows ₹499 (first payment) then ₹998 (after second payment).
+- Admin bookings: payment status column shows "Paid" for paid bookings.
+- Payment flow in browser: checkout dialog opens → card form pre-filled → submit → processing → success with receipt → close → list updates (badge changes to Paid, Pay button disappears).
+
+Stage Summary:
+- Payment status is consistent across customer dashboard, admin dashboard, and admin bookings. Revenue stats update in real-time.
+
+---
+Task ID: 7-f
+Agent: main
+Task: Phase 7 (part 6) — Lint + verify full payment flow
+
+Work Log:
+- Lint clean. All routes 200/201.
+- Verified via curl: create payment 201, verify 200 (payment.paid + booking.paymentStatus=paid + auto-confirm), duplicate 409, DB confirms Payment row paid.
+- Verified via browser: Pay now button opens checkout dialog (Secure checkout, Test mode, card form pre-filled with 4242), submit → processing spinner → success state with receipt (₹499, Home Cleaning, transaction ID, date), Done button closes dialog, bookings list auto-updates (badge → Paid, Pay button removed), dashboard total spent increases.
+- Admin sees: revenue ₹998, bookings with Paid badges.
+- Screenshots: phase7-checkout-dialog.png, phase7-my-bookings-paid.png.
+
+Stage Summary:
+- Phase 7 fully complete and browser-verified. Mock payment flow works end-to-end: create booking → pay now (or from dashboard) → checkout → processing → success + receipt → status updates everywhere. Ready for Phase 8 (n8n automation).

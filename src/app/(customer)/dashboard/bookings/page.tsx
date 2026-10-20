@@ -20,6 +20,7 @@ import {
   PaymentStatusBadge,
 } from "@/components/site/status-badges"
 import { CancelBookingButton } from "@/components/site/cancel-booking-button"
+import { PaymentButton } from "@/components/site/payment-button"
 
 export const dynamic = "force-dynamic"
 
@@ -136,12 +137,24 @@ export default async function MyBookingsPage() {
                         {format(booking.createdAt, "d MMM yyyy 'at' h:mm a")}
                       </p>
 
-                      {canCancel && (
-                        <div className="mt-4">
-                          <CancelBookingButton
-                            bookingId={booking.id}
-                            bookingLabel={booking.service.title}
-                          />
+                      {/* Action buttons: Pay (if unpaid) + Cancel (if cancellable) */}
+                      {(booking.paymentStatus === "pending" || canCancel) && (
+                        <div className="mt-4 flex flex-wrap items-center gap-2">
+                          {booking.paymentStatus === "pending" &&
+                            booking.status !== "cancelled" && (
+                              <PaymentButton
+                                bookingId={booking.id}
+                                serviceTitle={booking.service.title}
+                                amount={booking.service.price}
+                                variant="compact"
+                              />
+                            )}
+                          {canCancel && (
+                            <CancelBookingButton
+                              bookingId={booking.id}
+                              bookingLabel={booking.service.title}
+                            />
+                          )}
                         </div>
                       )}
                     </div>

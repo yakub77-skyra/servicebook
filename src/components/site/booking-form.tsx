@@ -18,6 +18,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
+import { PaymentButton } from "@/components/site/payment-button"
 
 // Time slots — kept in sync with the API route.
 const TIME_SLOTS = [
@@ -124,12 +125,30 @@ export function BookingForm({ service }: Props) {
         <p className="mt-2 text-xs text-muted-foreground">
           Status: <span className="font-medium text-amber-600">Pending confirmation</span> · Payment: pending
         </p>
-        <div className="mt-6 flex flex-col gap-2 sm:flex-row">
-          <Button onClick={() => router.push("/dashboard/bookings")}>
+
+        {/* Pay now CTA */}
+        <div className="mt-5 w-full rounded-lg border border-amber-200 bg-amber-50 p-4 dark:border-amber-900/50 dark:bg-amber-950/20">
+          <p className="text-sm font-medium text-amber-900 dark:text-amber-400">
+            Complete your payment now
+          </p>
+          <p className="mt-0.5 text-xs text-amber-800 dark:text-amber-500">
+            Pay ₹{service.price} to confirm your slot instantly.
+          </p>
+          <div className="mt-3 flex justify-center">
+            <PaymentButton
+              bookingId={createdBookingId}
+              serviceTitle={service.title}
+              amount={service.price}
+            />
+          </div>
+        </div>
+
+        <div className="mt-4 flex flex-col gap-2 sm:flex-row">
+          <Button onClick={() => router.push("/dashboard/bookings")} variant="outline">
             View my bookings
             <ArrowRight className="size-4" />
           </Button>
-          <Button variant="outline" onClick={() => router.push("/services")}>
+          <Button variant="ghost" onClick={() => router.push("/services")}>
             Browse more services
           </Button>
         </div>
